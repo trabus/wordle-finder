@@ -5,12 +5,11 @@ import html2canvas from 'html2canvas';
 export default class LetterComponent extends Component {
   @tracked showData;
   get letterBg() {
-    const { trayId, value } = this.args;
+    const { trayId } = this.args;
     if (trayId.includes('good')) {
       return 'letter-good-bg';
     }
-    const bg = value.from.includes('dead') ? 'dead' : trayId;
-    return `letter-${bg}-bg`;
+    return `letter-${trayId}-bg`;
   }
   get letterData() {
     const { wordFinder, value } = this.args;
@@ -23,14 +22,12 @@ export default class LetterComponent extends Component {
     return this.letterData.frequency.toFixed(2);
   }
   toggleDead = () => {
-    const { wordFinder, trayId, value } = this.args;
-    if (value.from === 'startLetters') {
-      wordFinder.updateList('deadLetters', value);
+    const { wordFinder, value } = this.args;
+    if (value.from === 'start') {
+      wordFinder.updateList('dead', value);
     } else {
-      wordFinder.updateList('startLetters', value);
+      wordFinder.updateList('start', value);
     }
-    const to = `${trayId}Letters`;
-    console.log(to, value);
   };
   hoverShowData = (show, e) => {
     this.showData = show;

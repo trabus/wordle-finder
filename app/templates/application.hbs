@@ -35,9 +35,9 @@
         </div>
         <div class="text-slate-400 text-2xl w-full text-center uppercase">Possible Words</div>
         {{#if this.wordFinder.possibleWords}}
-            <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 border-orange-400 border-solid border-4 text-gray-800 " ...attributes>
+            <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 border-orange-400 border-solid border-4 text-gray-400" ...attributes>
                 {{#each this.wordFinder.possibleWords as |word|}}
-                    <div class="p-2 text-center uppercase">
+                    <div class={{concat "p-2 text-center uppercase " (if (is-common this.wordFinder.commonList word) "text-gray-600")}}>
                         {{word}}
                     </div>
                 {{else}}

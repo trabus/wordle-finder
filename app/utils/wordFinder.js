@@ -7,9 +7,10 @@ export default class WordFinder {
   letters;
   letterData;
   letterList;
+  commonList;
   groupList;
   listLength = 9000;
-  @tracked wordList;
+  wordLists;
 
   @tracked good0Letters = [];
   @tracked good1Letters = [];
@@ -22,13 +23,14 @@ export default class WordFinder {
   @tracked isReady = false;
 
   constructor() {
-    this.wordList = wordlist();
+    this.wordLists = wordlist();
     this.letterList = new Map();
     this.groupList = new Map();
+    this.commonList = [...this.wordLists['2500']];
 
     this.letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
     this.letterData = this.letters.map((l) => {
-      return { name: l, from: 'startLetters' };
+      return { name: l, from: 'start' };
     });
 
     this.startLetters = [...this.letterData];
@@ -38,17 +40,16 @@ export default class WordFinder {
     this.buildLetterList();
     this.buildWordList.perform();
   }
-
+  get wordList() {
+    const words = [...this.wordLists['9000'], ...this.wordLists['2500']];
+    return [...new Set(words)];
+  }
   @cached
   get totalWordListLetterCount() {
-    return (
-      (this.wordList &&
-        this.wordList[this.listLength].join('').split('').length) ||
-      0
-    );
+    return (this.wordList && this.wordList.join('').split('').length) || 0;
   }
   get totalWordCount() {
-    return this.wordList[this.listLength].length;
+    return this.wordList.length;
   }
   get trayLetters() {
     return [...this.startLetters, ...this.deadLetters];
@@ -124,7 +125,7 @@ export default class WordFinder {
 
   @task
   *buildWordKeys() {
-    const words = [...this.wordList[this.listLength]];
+    const words = [...this.wordList];
     const keys = [];
     while (words.length) {
       const key = yield this.buildKeys.perform(words.splice(0, 1)[0]);
@@ -199,10 +200,7 @@ export default class WordFinder {
     if (!words.length && !this.deadLetters.length) return [];
     // we hit an nonexistent key, use deadletters
     if (!words.length) {
-      words = this.deadLetterExclusion(
-        this.deadLetterValues,
-        this.wordList[this.listLength]
-      );
+      words = this.deadLetterExclusion(this.deadLetterValues, this.wordList);
     }
 
     const uniqueWords = [...new Set(words)];
@@ -238,8 +236,9 @@ export default class WordFinder {
         }
         return add;
       });
-      // console.log('wordlog', wordlog);
-      // console.log('deleted', deleted);
+      console.log('wordlog', wordlog);
+      console.log('deleted', deleted);
+      console.log('pos', this.goodLetterPositions);
       return filtered;
     }
     return words;
@@ -255,27 +254,29 @@ export default class WordFinder {
     const [to, value] = values;
     const { from } = value;
     console.log(to, from, value);
-    const fromList = [...this[from]];
-    const toList = [...this[to]];
+    const toKey = `${to}Letters`;
+    const fromKey = `${from}Letters`;
+    const fromList = [...this[fromKey]];
+    const toList = [...this[toKey]];
 
     // don't insert if already occupied
-    if (to.includes('good') && this[to].length) return;
+    if (to.includes('good') && this[toKey].length) return;
     // remove item from fromList
     // console.log('removing ', fromList.indexOf(value))
 
     if (to.includes('good')) {
       // console.log('writing', to, toList)
       value.from = to;
-      this[to] = [{ ...value }];
+      this[toKey] = [{ ...value }];
     } else {
       value.from = to;
-      this[to] = [...toList, { ...value }];
+      this[toKey] = [...toList, { ...value }];
     }
     if (from.includes('good')) {
-      this[from] = [];
+      this[fromKey] = [];
     } else {
       if (to !== from) fromList.splice(fromList.indexOf(value), 1);
-      this[from] = [...fromList];
+      this[fromKey] = [...fromList];
     }
 
     // console.log(`updated ${to}`, [...this[to]]);
