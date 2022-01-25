@@ -1,7 +1,73 @@
-{{page-title "WordleAssist"}}
+{{page-title "WordleFinder"}}
 
-{{!-- The following component displays Ember's default welcome message. --}}
-<WelcomePage />
-{{!-- Feel free to remove this! --}}
+<section class="container mx-auto mt-4">
+    {{#if this.wordFinder.isReady}}
+        <div class="grid lg:grid-cols-2 grid-cols-1 gap-2">
+            <div class="grid grid-cols-5 place-items-center">
+                <Tray @name="1" @id="good0" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good0Letters}} class="tray-single good-border" />
+                <Tray @name="2" @id="good1" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good1Letters}} class="tray-single good-border" />
+                <Tray @name="3" @id="good2" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good2Letters}} class="tray-single good-border" />
+                <Tray @name="4" @id="good3" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good3Letters}} class="tray-single good-border" />
+                <Tray @name="5" @id="good4" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good4Letters}} class="tray-single good-border" />
+            </div>
+            <Tray @name="found" @id="bad" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.badLetters}} class="tray-group tray-half bad-border" />
+        </div>
+        <div>
+            <Tray @name="excluded" @id="dead" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.deadLetters}} class="tray-group tray-full dead-border" />
+        </div>
+        <div>
+            <Tray @id="start" @wordFinder={{this.wordFinder}} @letters={{this.trayLetterValues}} class="tray-group tray-full" >
+                <div class="col-span-full justify-content-center text-center row-span-full mb-6">
+                    {{#unless this.wordFinder.lettersPlaced}}
+                        <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
+                        ☝️ drag some letters up!☝️
+                        </h3>
+                    {{/unless}}
+                    <h3 class="text-green-600 opacity-80">
+                        👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
+                    </h3>
+                </div>
+                <div class="col-span-full place-self-end pr-4">
+                    <button {{on "click" this.wordFinder.reset}} class="bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-2">Reset</button>
+                    <span class="">{{this.startLetterLength}}</span>
+                </div>
+            </Tray>
+        </div>
+        <div class="text-slate-400 text-2xl w-full text-center uppercase">Possible Words</div>
+        {{#if this.wordFinder.possibleWords}}
+            <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 border-orange-400 border-solid border-4 text-gray-800 " ...attributes>
+                {{#each this.wordFinder.possibleWords as |word|}}
+                    <div class="p-2 text-center uppercase">
+                        {{word}}
+                    </div>
+                {{else}}
+                    
+                {{/each}}
+            </div>
+            {{#if this.debug}}
+                <div class="word-container">
+                    <div class="text-orange-800 p-2">
+                        {{#each this.wordFinder.lettersPlaced as |letter|}}
+                           <span class="is-dragging-object">{{letter.name}}</span>
+                        {{/each}}
+                    </div>
+                </div>
+                <div class="hidden">
+                    <div class="letter-good-bg letter-bad-bg letter-dead-bg letter-start-bg"></div>
+                </div>
+            {{/if}}
+        {{else}}
+            <div class="word-container relative text-gray-800">
+                <div class="py-2 text-lg text-center w-full opacity-30">
+                    {{this.wordContainerMessage}}
+                </div>
 
+            </div>
+        {{/if}}
+    {{else}}
+        <div class="container text-center mt-12 text-green-500 animate-pulse">
+            ...Building Word List
+        </div>
+    {{/if}}
+</section>
 {{outlet}}

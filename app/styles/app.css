@@ -1,0 +1,69 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+@import "components.css";
+
+@import "tailwindcss/utilities";
+@import "utilities.css";
+
+@layer components {
+  .tray-full {
+    @apply lg:grid-cols-12 md:grid-cols-10 sm:grid-cols-8 grid-cols-6;
+  }
+  .tray-half {
+    @apply lg:grid-cols-8 md:grid-cols-6 grid-cols-4;
+  }
+  .tray-group {
+    @apply my-4 rounded-lg place-items-center grid grid-flow-row auto-rows-auto;
+    min-width: 4rem;
+    min-height: 4rem;
+  }
+  .tray-single {
+    @apply my-2 rounded-md place-items-center grid grid-cols-1;
+    min-width: 4rem;
+    min-height: 4rem;
+    max-width: 4rem;
+  }
+  .word-container {
+    @apply container bg-gray-200 m-2 rounded-lg border-orange-400 border-solid border-4;
+  }
+  .is-dragging-object {
+    @apply border-solid border-2 border-white leading-none;
+  }
+  .letter-text {
+    @apply text-white font-bold;
+  }
+  .letter-object {
+    @apply cursor-pointer rounded-md p-3 m-2 w-12 h-12 text-center select-none z-10 uppercase;
+  }
+  .letter-start-bg {
+    @apply bg-gray-500 hover:bg-gray-600 letter-text;
+  }
+  .letter-good-bg {
+    @apply bg-green-600 hover:bg-green-900 letter-text;
+  }
+  .letter-bad-bg {
+    @apply bg-yellow-400 hover:bg-yellow-800 letter-text;
+  }
+  .letter-dead-bg {
+    @apply bg-gray-800 letter-text;
+  }
+  .good-border {
+    @apply border-solid border-4 border-green-600;
+  }
+  .accepts-drag.good-border {
+    @apply outline outline-green-400 outline-8;
+  }
+  .bad-border {
+    @apply border-solid border-4 border-yellow-400;
+  }
+  .accepts-drag.bad-border {
+    @apply outline outline-yellow-200 outline-8;
+  }
+  .dead-border {
+    @apply border-solid border-4 border-gray-600;
+  }
+  .accepts-drag.dead-border {
+    @apply outline outline-gray-400 outline-8;
+  }
+}
