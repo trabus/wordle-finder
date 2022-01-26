@@ -36,6 +36,12 @@ export default class ApplicationController extends Controller {
       ? 'no possible words with placed letters!'
       : 'place some letters above!';
   }
+  toggleCommon = (e) => {
+    this.wordFinder.useCommon = e.target.checked;
+  }
+  toggleAlpha = (e) => {
+    this.wordFinder.sortAlpha = e.target.checked;
+  }
 }
 
 /**

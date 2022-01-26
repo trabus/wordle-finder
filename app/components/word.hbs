@@ -1,0 +1,13 @@
+<div 
+   {{on "mouseenter" (fn this.hoverShowData true)}}
+   {{on "mouseleave" (fn this.hoverShowData false)}}
+  class={{concat "p-2 text-center uppercase cursor-help select-none " this.wordClass}}>
+    {{@word}}
+</div>
+{{#if this.showData}}
+   <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
+      <p>The word <span class="font-black text-pink-600 text-3xl uppercase">{{@word}}</span> is used
+       roughly <span class="font-bold text-indigo-400">{{this.wordData.frequency}}%</span> of the time in the documents used to compile this data.</p>
+      <p>It ranks <span class="font-bold text-violet-300">{{this.wordData.ranking}}</span> of the <span class="font-bold text-indigo-400">86799</span> words compiled <span class="text-xs italic">(only {{@wordFinder.totalWordCount}} of which are five letters long)</span>.</p>
+   </div>
+{{/if}}

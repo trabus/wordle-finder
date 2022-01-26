@@ -11,8 +11,8 @@
    {{@value.name}}
 </DraggableObject>
 {{#if this.showData}}
-   <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-800 bg-slate-300/[.9] z-100">
-   The letter <span class="font-black text-pink-600 text-3xl uppercase">{{@value.name}}</span> appears <span class="font-bold text-indigo-900">{{this.letterCount}}</span> times. 
-   This makes up <span class="font-bold text-indigo-700">{{this.letterFrequency}}%</span> of all of the letters in the <span class="text-slate-700 font-bold">{{@wordFinder.totalWordCount}}</span> words used in this app.
+   <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
+   The letter <span class="font-black text-pink-600 text-3xl uppercase">{{@value.name}}</span> appears <span class="font-bold text-indigo-400">{{this.letterCount}}</span> times. 
+   This makes up <span class="font-bold text-violet-300">{{this.letterFrequency}}%</span> of all of the letters in the <span class="text-indigo-400 font-bold">{{@wordFinder.totalWordCount}}</span> words used in this app.
    </div>
 {{/if}}

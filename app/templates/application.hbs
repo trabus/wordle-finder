@@ -27,19 +27,23 @@
                         👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
                     </h3>
                 </div>
-                <div class="col-span-full place-self-end pr-4">
-                    <button {{on "click" this.wordFinder.reset}} class="bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-2">Reset</button>
-                    <span class="">{{this.startLetterLength}}</span>
+                <div class="col-span-full place-self-end pr-4 flex">
+                    <div class="justify-end">
+                        <span class="flex"><Toggle {{on "input" this.toggleAlpha}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle></span>
+                        <span class="flex"><Toggle {{on "input" this.toggleCommon}} @id="common-words" @checked={{this.wordFinder.useCommon}} >use common words</Toggle></span>
+                    </div>
+                    <div class="justify-end">
+                        <button class="bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-2" type="button" {{on "click" this.wordFinder.reset}}>Reset</button>
+                        <span class="">{{this.startLetterLength}}</span>
+                    </div>
                 </div>
             </Tray>
         </div>
-        <div class="text-slate-400 text-2xl w-full text-center uppercase">Possible Words</div>
+        <div class="text-slate-400 text-2xl w-full text-center uppercase flex justify-center"><div class="text-slate-500 font-black px-2">{{this.wordFinder.possibleWordCount}}</div> <div class="px-2">Possible Words</div></div>
         {{#if this.wordFinder.possibleWords}}
             <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 border-orange-400 border-solid border-4 text-gray-400" ...attributes>
                 {{#each this.wordFinder.possibleWords as |word|}}
-                    <div class={{concat "p-2 text-center uppercase " (if (is-common this.wordFinder.commonList word) "text-gray-600")}}>
-                        {{word}}
-                    </div>
+                    <Word @wordFinder={{this.wordFinder}} @word={{word}} />
                 {{else}}
                     
                 {{/each}}

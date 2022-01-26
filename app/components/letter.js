@@ -5,11 +5,11 @@ import html2canvas from 'html2canvas';
 export default class LetterComponent extends Component {
   @tracked showData;
   get letterBg() {
-    const { trayId } = this.args;
-    if (trayId.includes('good')) {
+    const { value } = this.args;
+    if (value.from.includes('good')) {
       return 'letter-good-bg';
     }
-    return `letter-${trayId}-bg`;
+    return `letter-${value.from}-bg`;
   }
   get letterData() {
     const { wordFinder, value } = this.args;
@@ -29,7 +29,7 @@ export default class LetterComponent extends Component {
       wordFinder.updateList('start', value);
     }
   };
-  hoverShowData = (show, e) => {
+  hoverShowData = (show) => {
     this.showData = show;
   };
   dragStartHook = (e) => {

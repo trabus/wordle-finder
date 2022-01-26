@@ -1,4 +1,6 @@
-import wordlist from '../utils/wordlist';
+import WordList from '../utils/word-list';
+import WordLists from '../utils/wordlist';
+import WordData from '../utils/word-data';
 import { cached } from '@glimmer/tracking';
 import { tracked } from 'tracked-built-ins';
 import { task } from 'ember-concurrency';
@@ -11,6 +13,8 @@ export default class WordFinder {
   groupList;
   listLength = 9000;
   wordLists;
+  wordList;
+  wordData;
 
   @tracked good0Letters = [];
   @tracked good1Letters = [];
@@ -21,13 +25,19 @@ export default class WordFinder {
   @tracked deadLetters = [];
   @tracked startLetters = [];
   @tracked isReady = false;
+  @tracked useCommon = true;
+  @tracked sortAlpha = false;
 
   constructor() {
-    this.wordLists = wordlist();
+    const wordData = WordData();
+    this.wordLists = WordLists();
+    this.wordList = WordList().words;
+    this.wordData = new Map(wordData);
     this.letterList = new Map();
     this.groupList = new Map();
-    this.commonList = [...this.wordLists['2500']];
+    this.commonList = wordData.map((word) => word[0]);
 
+    // console.log(this.wordList.length, this.commonList.length);
     this.letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
     this.letterData = this.letters.map((l) => {
       return { name: l, from: 'start' };
@@ -40,10 +50,7 @@ export default class WordFinder {
     this.buildLetterList();
     this.buildWordList.perform();
   }
-  get wordList() {
-    const words = [...this.wordLists['9000'], ...this.wordLists['2500']];
-    return [...new Set(words)];
-  }
+
   @cached
   get totalWordListLetterCount() {
     return (this.wordList && this.wordList.join('').split('').length) || 0;
@@ -97,6 +104,9 @@ export default class WordFinder {
         return a[1].freq < b[1].freq ? 1 : a[1].freq === b[1].freq ? 0 : -1;
       })
     );
+  }
+  get possibleWordCount() {
+    return this.possibleWords.length;
   }
 
   get foundLetters() {
@@ -192,6 +202,7 @@ export default class WordFinder {
   }
 
   get possibleWords() {
+    console.log('possible');
     // don't return anything until a letter is placed
     if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
@@ -200,7 +211,17 @@ export default class WordFinder {
     if (!words.length && !this.deadLetters.length) return [];
     // we hit an nonexistent key, use deadletters
     if (!words.length) {
-      words = this.deadLetterExclusion(this.deadLetterValues, this.wordList);
+      const inputList = this.useCommon
+        ? this.sortAlpha
+          ? [...this.commonList].sort()
+          : [...this.commonList]
+        : this.wordList;
+      words = this.deadLetterExclusion(this.deadLetterValues, inputList);
+    }
+    if (this.useCommon) {
+      words = [...words].filter((word) => {
+        return this.commonList.includes(word);
+      });
     }
 
     const uniqueWords = [...new Set(words)];
@@ -236,9 +257,9 @@ export default class WordFinder {
         }
         return add;
       });
-      console.log('wordlog', wordlog);
-      console.log('deleted', deleted);
-      console.log('pos', this.goodLetterPositions);
+      // console.log('wordlog', wordlog);
+      // console.log('deleted', deleted);
+      // console.log('pos', this.goodLetterPositions);
       return filtered;
     }
     return words;
@@ -253,7 +274,7 @@ export default class WordFinder {
   updateList = (...values) => {
     const [to, value] = values;
     const { from } = value;
-    console.log(to, from, value);
+    // console.log(to, from, value);
     const toKey = `${to}Letters`;
     const fromKey = `${from}Letters`;
     const fromList = [...this[fromKey]];
@@ -280,7 +301,7 @@ export default class WordFinder {
     }
 
     // console.log(`updated ${to}`, [...this[to]]);
-    console.log(this);
+    // console.log(this);
   };
   reset = () => {
     // console.log('reset!', this)
@@ -293,7 +314,7 @@ export default class WordFinder {
       ...this.badLetters,
       ...this.deadLetters,
     ].forEach((value) => {
-      this.updateList('startLetters', value);
+      this.updateList('start', value);
     });
   };
 
