@@ -14,7 +14,7 @@
     @apply lg:grid-cols-8 md:grid-cols-6 grid-cols-4;
   }
   .tray-group {
-    @apply my-4 rounded-lg place-items-center grid grid-flow-row auto-rows-auto;
+    @apply my-2 rounded-lg place-items-center grid grid-flow-row auto-rows-auto;
     min-width: 4rem;
     min-height: 4rem;
   }
@@ -80,18 +80,29 @@
   }
 
   .text-slot {
-    width: auto;
-    height: 4rem;
-    overflow-x: hidden;
-    overflow-y: auto;
     animation: slot-stop 0.25s;
+    height: 4rem;
+    overflow: hidden;
   }
   .text-slot.spin {
     animation: slot-y 0.1s infinite;
     text-shadow: 0 0 32px white;
     color: transparent;
   }
-
+  .text-slot.intro {
+    animation: slot-y-intro 0.5s 3;
+  }
+  @keyframes slot-y-intro {
+    from {
+      transform: translateY(-100%);
+      text-shadow: 0 0 2px white; 
+      animation-timing-function: cubic-bezier(0, 1, 0, 0);
+    }
+    to {
+      transform: translateY(100%);
+      text-shadow: 0 0 0 white;
+    }
+  }
   @keyframes slot-y {
     from {
       transform: translateY(-100%);
@@ -100,12 +111,11 @@
       transform: translateY(100%);
     }
   }
-
   @keyframes slot-stop {
     from {
       transform: translateY(-100%);
-      animation-timing-function: cubic-bezier(0, 0, 0.6, 1);
-      text-shadow: 0 0 32px white;
+      animation-timing-function: cubic-bezier(0, 1, -0.2, 1);
+      text-shadow: 0 0 13px white;
     }
     to {
       transform: translateY(0);

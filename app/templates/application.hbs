@@ -1,4 +1,14 @@
 {{page-title "WordleFinder"}}
+
+<div class="text-6xl my-4 mx-auto uppercase font-black text-slate-200">
+    <div class="text-center flex flex-nowrap place-content-center cursor-default overflow-hidden" {{on "click" this.toggleSpin}}>
+        <div class="pr-3">Wordle</div>
+        <div id="title-slot" 
+            class="text-slot intro"
+            {{did-insert (perform this.initWordFinder)}}    
+        >{{this.title}}</div>
+    </div>
+</div>
 <section class="container mx-auto mt-4">
     {{#if this.wordFinder.isReady}}
         <div class="grid lg:grid-cols-2 grid-cols-1 gap-2">
@@ -11,21 +21,12 @@
             </div>
             <Tray @name="found" @id="bad" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.badLetters}} class="tray-group tray-half bad-border" />
         </div>
-        <div>
+        {{!-- <div>
             <Tray @name="excluded" @id="dead" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.deadLetters}} class="tray-group tray-full dead-border" />
-        </div>
+        </div> --}}
         <div>
             <Tray @id="start" @wordFinder={{this.wordFinder}} @letters={{this.trayLetterValues}} class="tray-group tray-full" >
-                <div class="col-span-full justify-content-center text-center row-span-full mb-6">
-                    {{#unless this.wordFinder.lettersPlaced}}
-                        <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
-                        ☝️ drag some letters up!☝️
-                        </h3>
-                    {{/unless}}
-                    <h3 class="text-green-600 opacity-80">
-                        👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
-                    </h3>
-                </div>
+        
                 <div class="col-span-full place-self-end pr-4 flex">
                     <div class="justify-end">
                         <span class="flex"><Toggle {{on "input" this.toggleAlpha}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle></span>
@@ -37,6 +38,16 @@
                     </div>
                 </div>
             </Tray>
+            <div class="col-span-full justify-content-center text-center row-span-full mb-6">
+                    {{#unless this.wordFinder.lettersPlaced}}
+                        <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
+                        ☝️ drag some letters up!☝️
+                        </h3>
+                    {{/unless}}
+                    <h3 class="text-green-600 opacity-80">
+                        👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
+                    </h3>
+                </div>
         </div>
         <div class="text-slate-400 text-2xl w-full text-center uppercase flex justify-center"><div class="text-slate-500 font-black px-2">{{this.wordFinder.possibleWordCount}}</div> <div class="px-2">Possible Words</div></div>
         {{#if this.wordFinder.possibleWords}}

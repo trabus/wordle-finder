@@ -7,6 +7,7 @@ import { task } from 'ember-concurrency';
 
 export default class WordFinder {
   letters;
+  qwerty;
   letterData;
   letterList;
   commonList;
@@ -39,6 +40,7 @@ export default class WordFinder {
 
     // console.log(this.wordList.length, this.commonList.length);
     this.letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    this.qwerty = 'qwertyuioplkjhgfdsazxcvbnm'.split('');
     this.letterData = this.letters.map((l) => {
       return { name: l, from: 'start' };
     });
@@ -48,7 +50,7 @@ export default class WordFinder {
 
   init() {
     this.buildLetterList();
-    this.buildWordList.perform();
+    return this.buildWordList.perform();
   }
 
   @cached
@@ -202,7 +204,7 @@ export default class WordFinder {
   }
 
   get possibleWords() {
-    console.log('possible');
+    // console.log('possible');
     // don't return anything until a letter is placed
     if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
