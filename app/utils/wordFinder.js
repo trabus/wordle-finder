@@ -7,6 +7,10 @@ import { task } from 'ember-concurrency';
 
 export default class WordFinder {
   letters;
+  qwerty;
+  dvorak;
+  colemak;
+  letterSortType = 'qwerty';
   letterData;
   letterList;
   commonList;
@@ -39,10 +43,12 @@ export default class WordFinder {
 
     // console.log(this.wordList.length, this.commonList.length);
     this.letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    this.qwerty = 'qwertyuioplkjhgfdsazxcvbnm'.split('');
+    this.dvorak = 'pyfgcrlaoeuidhtnsqjkxbmwvz'.split('');
+    this.colemak = 'qwfpgjluyarstdhneiozxcbkm'.split('');
     this.letterData = this.letters.map((l) => {
       return { name: l, from: 'start' };
     });
-
     this.startLetters = [...this.letterData];
   }
 
@@ -59,7 +65,25 @@ export default class WordFinder {
     return this.wordList.length;
   }
   get trayLetters() {
-    return [...this.startLetters, ...this.deadLetters];
+    const sortArray = this[this.letterSortType];
+    const letters = [
+      ...this.startLetters,
+      ...this.deadLetters,
+      ...this.badLetters,
+      ...this.good0Letters,
+      ...this.good1Letters,
+      ...this.good2Letters,
+      ...this.good3Letters,
+      ...this.good4Letters,
+    ].reduce(
+      (sorted, letter) => {
+        const { name } = letter;
+        sorted[sortArray.indexOf(name)] = { ...letter };
+        return sorted;
+      },
+      [...new Array(sortArray.length)]
+    );
+    return letters;
   }
   get badLetterValues() {
     return [...this.badLetters].map((i) => i.name);
@@ -73,6 +97,7 @@ export default class WordFinder {
     );
   }
 
+  // used for exlcuding words that don't match known positions
   get goodLetterPositions() {
     const goodLetters = {};
     [
@@ -127,8 +152,7 @@ export default class WordFinder {
   }
 
   buildLetterList = () => {
-    const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    letters.forEach((v) => {
+    this.letters.forEach((v) => {
       this.letterList.set(v, { count: 0, frequency: 0 });
     });
   };
@@ -273,20 +297,23 @@ export default class WordFinder {
 
   updateList = (...values) => {
     const [to, value] = values;
-    const { from } = value;
-    // console.log(to, from, value);
+    const { name, from } = value;
+    console.log(`to: ${to} , from ${from}`, value);
     const toKey = `${to}Letters`;
     const fromKey = `${from}Letters`;
     const fromList = [...this[fromKey]];
     const toList = [...this[toKey]];
+    const fromIndex = fromList.findIndex((v, i) => {
+      return v.name === name;
+    });
 
     // don't insert if already occupied
     if (to.includes('good') && this[toKey].length) return;
     // remove item from fromList
-    // console.log('removing ', fromList.indexOf(value))
+    console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
 
+    console.log('writing', to, toList);
     if (to.includes('good')) {
-      // console.log('writing', to, toList)
       value.from = to;
       this[toKey] = [{ ...value }];
     } else {
@@ -296,12 +323,12 @@ export default class WordFinder {
     if (from.includes('good')) {
       this[fromKey] = [];
     } else {
-      if (to !== from) fromList.splice(fromList.indexOf(value), 1);
+      if (to !== from) fromList.splice(fromIndex, 1);
       this[fromKey] = [...fromList];
     }
 
     // console.log(`updated ${to}`, [...this[to]]);
-    // console.log(this);
+    console.log(this);
   };
   reset = () => {
     // console.log('reset!', this)

@@ -22,9 +22,11 @@ export default class ApplicationController extends Controller {
     return this.wordFinder.startLetters.length;
   }
   get trayLetterValues() {
-    return this.wordFinder.trayLetters.sort((a, b) => {
-      return a.name > b.name ? 1 : a.name === b.name ? 0 : -1;
-    });
+    console.log(this.wordFinder.trayLetters)
+    return this.wordFinder.trayLetters;
+    // return this.wordFinder.trayLetters.sort((a, b) => {
+    //   return a.name > b.name ? 1 : a.name === b.name ? 0 : -1;
+    // });
   }
 
   get wordContainerMessage() {
