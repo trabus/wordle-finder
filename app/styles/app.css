@@ -78,4 +78,38 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
     background-color: rgb(8, 145, 178);
   }
+
+  .text-slot {
+    width: auto;
+    height: 4rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    animation: slot-stop 0.25s;
+  }
+  .text-slot.spin {
+    animation: slot-y 0.1s infinite;
+    text-shadow: 0 0 32px white;
+    color: transparent;
+  }
+
+  @keyframes slot-y {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes slot-stop {
+    from {
+      transform: translateY(-100%);
+      animation-timing-function: cubic-bezier(0, 0, 0.6, 1);
+      text-shadow: 0 0 32px white;
+    }
+    to {
+      transform: translateY(0);
+      text-shadow: 0 0 0 white;
+    }
+  }
 }

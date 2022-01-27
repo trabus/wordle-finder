@@ -17,6 +17,9 @@ export default class ApplicationController extends Controller {
   initWordFinder() {
     this.wordFinder.init();
   }
+  toggleSpin = (e) => {
+    e.target.classList.toggle('spin');
+  }
 
   get startLetterLength() {
     return this.wordFinder.startLetters.length;
@@ -38,17 +41,26 @@ export default class ApplicationController extends Controller {
   }
   toggleCommon = (e) => {
     this.wordFinder.useCommon = e.target.checked;
-  }
+  };
   toggleAlpha = (e) => {
     this.wordFinder.sortAlpha = e.target.checked;
-  }
+  };
 }
 
 /**
- 1. fix good-letters so it clears entites that were dragged out - may need ot get more info setup in a different structure (maybe use drag event)
- 2. build proper goodLetters structure so wordFinder can use it, i.e. an object with numbered keys and letter values - maybe filter empty keys?
- 3. wire up wordFinder to react to data and update possibleWords - only show if less than specific threshold (like 50 or less?) - may need to work with tracked properties more, don't forget deep objects don't track (maybe use tracked-built-ins)
- 4. setup wordFinder letterData (percentages, etc)
-  
- 
+ 1. make word data use frequency to affect color or some other indicator
+ 2. more style tuning especially colors and fonts
+ 3. control tooltips or help popup, include credits
+ 4. duplicate good letter support? allow for more than one of the same letter in good slots
+ 5. more caching and tuning for performance
+ 6. add spinner or something for processing time, also disable buttons or toggle to prevent thrashing
+ 7. local storage for favoriting words?
+ 8. AWS deployment and serving at trab.us/wordle-assist
+ 9. decide on final name, maybe get input from friends 
+ OR slot machine cycle/animate through a set of synonyms for assist on intro, 
+ then pick the last one for the page and set it
+ use: https://stackoverflow.com/questions/37713585/word-change-in-phase-css-vertical-animation-loop
+ - css animation for slide in
+ - use ec to switch value with timing
+ - swap in with blurred images during spin?
  */

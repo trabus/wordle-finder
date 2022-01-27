@@ -1,5 +1,4 @@
 {{page-title "WordleFinder"}}
-
 <section class="container mx-auto mt-4">
     {{#if this.wordFinder.isReady}}
         <div class="grid lg:grid-cols-2 grid-cols-1 gap-2">
@@ -74,4 +73,7 @@
         </div>
     {{/if}}
 </section>
+{{!-- <div class="text-6xl mx-auto text-center flex place-content-center overflow-hidden">
+    <div class="blur-text text-slot" {{on "click" this.toggleSpin}}>A</div>A
+</div> --}}
 {{outlet}}
