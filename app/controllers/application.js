@@ -59,10 +59,8 @@ export default class ApplicationController extends Controller {
   get startLetterLength() {
     return this.wordFinder.startLetters.length;
   }
-  get trayLetterValues() {
-    return this.wordFinder.trayLetters.sort((a, b) => {
-      return a.name > b.name ? 1 : a.name === b.name ? 0 : -1;
-    });
+  get processWordCount() {
+    return this.wordFinder.possibleWordCount || this.wordFinder.totalWordCount;
   }
 
   get wordContainerMessage() {
@@ -85,11 +83,16 @@ export default class ApplicationController extends Controller {
     }
     return title;
   }
+  selectKeyboard = (e) => {
+    this.wordFinder.keyboard = e.target.value;
+  };
   toggleCommon = (e) => {
     this.wordFinder.useCommon = e.target.checked;
+    this.wordFinder.updateSettings();
   };
   toggleAlpha = (e) => {
     this.wordFinder.sortAlpha = e.target.checked;
+    this.wordFinder.updateSettings();
   };
 }
 
