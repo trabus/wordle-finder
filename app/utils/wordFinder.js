@@ -8,6 +8,7 @@ import { task, lastValue } from 'ember-concurrency';
 
 export default class WordFinder {
   letters;
+  qwerty;
   letterData;
   letterList;
   commonList;
@@ -79,7 +80,7 @@ export default class WordFinder {
 
   init() {
     this.buildLetterList();
-    this.buildWordList.perform();
+    return this.buildWordList.perform();
   }
 
   @cached
