@@ -9,6 +9,9 @@ export default class WordComponent extends Component {
     }
     return '';
   }
+  get showInfo() {
+    return this.showData && this.args.wordFinder.showWordInfo;
+  }
   get wordData() {
     return this.args.wordFinder.wordData.get(this.args.word);
   }

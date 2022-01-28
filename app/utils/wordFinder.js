@@ -31,6 +31,8 @@ export default class WordFinder {
   @tracked useCommon = true;
   @tracked sortAlpha = false;
   @tracked keyboard = 'qwerty';
+  @tracked showLetterInfo = false;
+  @tracked showWordInfo = false;
 
   constructor() {
     const wordData = WordData();

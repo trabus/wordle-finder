@@ -3,6 +3,7 @@ import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { task, timeout } from 'ember-concurrency';
 import WordFinder from '../utils/wordFinder';
+import { modifier } from 'ember-modifier';
 
 export default class ApplicationController extends Controller {
   wordFinder;
@@ -94,6 +95,20 @@ export default class ApplicationController extends Controller {
     this.wordFinder.sortAlpha = e.target.checked;
     this.wordFinder.updateSettings();
   };
+  toggleWordInfo = (e) => {
+    this.wordFinder.showWordInfo = e.target.checked;
+  };
+  toggleLetterInfo = (e) => {
+    this.wordFinder.showLetterInfo = e.target.checked;
+  };
+  initFinder = modifier(() => {
+    this.initWordFinder.perform();
+  });
+  setSelected = modifier((element, [value, selected]) => {
+    const isSelected = value === selected;
+    console.log(value, selected, isSelected);
+    if (isSelected) element.setAttribute('selected', '');
+  });
 }
 
 /**
