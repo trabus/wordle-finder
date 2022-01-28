@@ -67,6 +67,9 @@
   .accepts-drag.dead-border {
     @apply outline outline-gray-400 outline-8;
   }
+  .button-blue {
+    @apply bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-2;
+  }
 
   .form-check-input {
     margin-top: .1rem;

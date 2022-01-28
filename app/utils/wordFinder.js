@@ -1,16 +1,13 @@
 import WordList from '../utils/word-list';
 import WordLists from '../utils/wordlist';
 import WordData from '../utils/word-data';
-import { cached } from '@glimmer/tracking';
-import { tracked } from 'tracked-built-ins';
-import { task } from 'ember-concurrency';
+import longProcess from '../utils/long-process';
+import { tracked } from '@glimmer/tracking';
+import { cached } from 'tracked-toolbox';
+import { task, lastValue } from 'ember-concurrency';
 
 export default class WordFinder {
   letters;
-  qwerty;
-  dvorak;
-  colemak;
-  letterSortType = 'qwerty';
   letterData;
   letterList;
   commonList;
@@ -19,6 +16,7 @@ export default class WordFinder {
   wordLists;
   wordList;
   wordData;
+  keyboards;
 
   @tracked good0Letters = [];
   @tracked good1Letters = [];
@@ -31,6 +29,7 @@ export default class WordFinder {
   @tracked isReady = false;
   @tracked useCommon = true;
   @tracked sortAlpha = false;
+  @tracked keyboard = 'qwerty';
 
   constructor() {
     const wordData = WordData();
@@ -42,11 +41,37 @@ export default class WordFinder {
     this.commonList = wordData.map((word) => word[0]);
 
     // console.log(this.wordList.length, this.commonList.length);
-    this.letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    this.qwerty = 'qwertyuioplkjhgfdsazxcvbnm'.split('');
-    this.dvorak = 'pyfgcrlaoeuidhtnsqjkxbmwvz'.split('');
-    this.colemak = 'qwfpgjluyarstdhneiozxcbkm'.split('');
-    this.letterData = this.letters.map((l) => {
+    this.keyboards = {
+      alpha: {
+        name: 'alpha',
+        value: 'alpha',
+        order: 'abcdefghijklmnopqrstuvwxyz',
+        values: [],
+      },
+      qwerty: {
+        name: 'qwerty',
+        value: 'qwerty',
+        order: 'qwertyuioplkjhgfdsazxcvbnm',
+        values: [],
+      },
+      dvorak: {
+        name: 'dvorak',
+        value: 'dvorak',
+        order: 'pyfgcrlaoeuidhtnsqjkxbmwvz',
+        values: [],
+      },
+      colemak: {
+        name: 'colemak',
+        value: 'colemak',
+        order: 'qwfpgjluyarstdhneiozxcbkm',
+        values: [],
+      },
+    };
+    Object.keys(this.keyboards).forEach((type) => {
+      this.keyboards[type].values = this.keyboards[type].order.split('');
+    });
+    this.letters = [...this.keyboards.alpha.values];
+    this.letterData = this.keyboards.alpha.values.map((l) => {
       return { name: l, from: 'start' };
     });
     this.startLetters = [...this.letterData];
@@ -65,7 +90,7 @@ export default class WordFinder {
     return this.wordList.length;
   }
   get trayLetters() {
-    const sortArray = this[this.letterSortType];
+    const sortArray = this.keyboards[this.keyboard].values;
     const letters = [
       ...this.startLetters,
       ...this.deadLetters,
@@ -85,6 +110,9 @@ export default class WordFinder {
     );
     return letters;
   }
+  get keyboardOptions() {
+    return Object.keys(this.keyboards).map((value) => this.keyboards[value]);
+  }
   get badLetterValues() {
     return [...this.badLetters].map((i) => i.name);
   }
@@ -98,6 +126,7 @@ export default class WordFinder {
   }
 
   // used for exlcuding words that don't match known positions
+  @cached
   get goodLetterPositions() {
     const goodLetters = {};
     [
@@ -111,6 +140,8 @@ export default class WordFinder {
     });
     return goodLetters;
   }
+  @lastValue('getPossibleWords')
+  possibleWords = [];
 
   get possibleLetters() {
     const letters = Array.from(this.letterList.keys()).filter((k) => {
@@ -225,12 +256,14 @@ export default class WordFinder {
     }, false);
   }
 
-  get possibleWords() {
+  @task
+  *getPossibleWords() {
     console.log('possible');
     // don't return anything until a letter is placed
     if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
     let words = this.groupList.get(groupKey) || [];
+    yield longProcess();
     // nonexistent key, no deadletters placed
     if (!words.length && !this.deadLetters.length) return [];
     // we hit an nonexistent key, use deadletters
@@ -254,8 +287,8 @@ export default class WordFinder {
     });
     const wordlog = {};
     const deleted = {};
-    if (this.goodLetterPositions) {
-      const filtered = filteredWords.filter((word) => {
+    if (Object.keys(this.goodLetterPositions).length) {
+      const filtered = yield filteredWords.filter((word) => {
         const add = Object.keys(this.goodLetterPositions).reduce(
           (bool, index) => {
             if (!this.goodLetterPositions[index]) return bool;
@@ -310,7 +343,9 @@ export default class WordFinder {
     // don't insert if already occupied
     if (to.includes('good') && this[toKey].length) return;
     // remove item from fromList
-    console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
+    console.log('removing ', value, fromIndex, fromList[fromIndex], [
+      ...fromList,
+    ]);
 
     console.log('writing', to, toList);
     if (to.includes('good')) {
@@ -326,8 +361,8 @@ export default class WordFinder {
       if (to !== from) fromList.splice(fromIndex, 1);
       this[fromKey] = [...fromList];
     }
-
     // console.log(`updated ${to}`, [...this[to]]);
+    this.getPossibleWords.perform();
     console.log(this);
   };
   reset = () => {
@@ -343,6 +378,10 @@ export default class WordFinder {
     ].forEach((value) => {
       this.updateList('start', value);
     });
+  };
+
+  updateSettings = () => {
+    this.getPossibleWords.perform();
   };
 
   deadLetterExclusion = (letters, keys) => {

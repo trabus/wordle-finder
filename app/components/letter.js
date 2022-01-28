@@ -13,7 +13,7 @@ export default class LetterComponent extends Component {
   }
   get isDraggable() {
     const { value } = this.args;
-    return value.from === 'start';
+    return value.from !== 'dead';
   }
   get letterData() {
     const { wordFinder, value } = this.args;
