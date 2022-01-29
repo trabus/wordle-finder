@@ -11,6 +11,9 @@ export default class LetterComponent extends Component {
     }
     return `letter-${value.from}-bg`;
   }
+  get showInfo() {
+    return this.showData && this.args.wordFinder.showLetterInfo;
+  }
   get isDraggable() {
     const { value } = this.args;
     return value.from !== 'dead';

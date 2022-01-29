@@ -13,7 +13,6 @@ export default class WordFinder {
   letterList;
   commonList;
   groupList;
-  listLength = 9000;
   wordLists;
   wordList;
   wordData;
@@ -31,6 +30,8 @@ export default class WordFinder {
   @tracked useCommon = true;
   @tracked sortAlpha = false;
   @tracked keyboard = 'qwerty';
+  @tracked showLetterInfo = false;
+  @tracked showWordInfo = false;
 
   constructor() {
     const wordData = WordData();
@@ -264,7 +265,6 @@ export default class WordFinder {
     if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
     let words = this.groupList.get(groupKey) || [];
-    yield longProcess();
     // nonexistent key, no deadletters placed
     if (!words.length && !this.deadLetters.length) return [];
     // we hit an nonexistent key, use deadletters
@@ -277,6 +277,7 @@ export default class WordFinder {
       words = this.deadLetterExclusion(this.deadLetterValues, inputList);
     }
     if (this.useCommon) {
+      yield longProcess();
       words = [...words].filter((word) => {
         return this.commonList.includes(word);
       });
@@ -332,7 +333,7 @@ export default class WordFinder {
   updateList = (...values) => {
     const [to, value] = values;
     const { name, from } = value;
-    console.log(`to: ${to} , from ${from}`, value);
+    // console.log(`to: ${to} , from ${from}`, value);
     const toKey = `${to}Letters`;
     const fromKey = `${from}Letters`;
     const fromList = [...this[fromKey]];
@@ -344,11 +345,11 @@ export default class WordFinder {
     // don't insert if already occupied
     if (to.includes('good') && this[toKey].length) return;
     // remove item from fromList
-    console.log('removing ', value, fromIndex, fromList[fromIndex], [
-      ...fromList,
-    ]);
+    // console.log('removing ', value, fromIndex, fromList[fromIndex], [
+    // ...fromList,
+    // ]);
 
-    console.log('writing', to, toList);
+    // console.log('writing', to, toList);
     if (to.includes('good')) {
       value.from = to;
       this[toKey] = [{ ...value }];
@@ -396,3 +397,38 @@ export default class WordFinder {
     });
   };
 }
+
+/**
+ * Setup flow:
+ * 0. word lists are loaded
+ * 1. letter list is generated
+ * 2. word lists are combined into main wordlist
+ * 2. words are processed: see "Word process flow"
+ * 3. letter counts are generated
+ * 4. word data is processed
+ *
+ * Word process flow:
+ * 1. main wordlist is iterated
+ * 2. each word is split and all letter permutations are generated
+ * 3. permutations are used as key for grouplist
+ * 3a. key is looked up on grouplist
+ * 3b. word is pushed into grouplist value
+ * 3c. grouplist is reassigned to key value
+ * 4. 
+ * 
+ * Processing flow:
+ * 0. words are processed: see word process flow
+ * 1. letter is placed/excluded
+ * 2. key created with additive letters combined and sorted
+ * 3. group is looked up by key
+ * 4. letters
+ * 
+ * 
+ * Improvments:
+ * 1. cumalatively add letter counts while processing instead of re-processing all letters
+ * 2. process main wordlist in batches of a limited size with EC so they are interruptable if inputs change
+ * 3. process word exclusion in batches of limited size with EC so they are interruptable if
+ *    letters are selected (currently cannot be selected due to blocking process)
+ * 4. see if we can process wordlist in background so we can get to the UI faster. If user places
+ *    letter before list is ready, we can use EC to wait for it before processing
+ */

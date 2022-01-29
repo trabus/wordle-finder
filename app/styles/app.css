@@ -13,17 +13,15 @@
   .tray-half {
     @apply lg:grid-cols-8 md:grid-cols-6 grid-cols-4;
   }
+  .tray-min {
+    @apply min-h-[3.5rem] min-w-[3.5rem];
+  }
   .tray-group {
-    @apply md:my-4 my-2 px-6 mx-auto rounded-lg place-items-center grid grid-flow-row auto-rows-auto;
-    min-width: 4rem;
-    min-height: 4rem;
+    @apply md:my-3 my-2 px-6 mx-auto rounded-lg place-items-center grid grid-flow-row tray-min max-w-3xl;
     max-width: 48rem;
   }
   .tray-single {
-    @apply my-2 rounded-md place-items-center grid grid-cols-1;
-    min-width: 4rem;
-    min-height: 4rem;
-    max-width: 4rem;
+    @apply my-2 rounded-md place-items-center grid max-w-min grid-cols-1 tray-min;
   }
   .word-container {
     @apply container bg-gray-200 m-2 rounded-lg border-orange-400 border-solid border-4;
@@ -35,7 +33,7 @@
     @apply text-white font-bold;
   }
   .letter-object {
-    @apply cursor-pointer rounded-md md:p-3 md:m-2 md:w-12 md:h-12 p-2 my-1 w-10 h-10 text-center select-none z-10 uppercase;
+    @apply cursor-pointer rounded-md md:p-3 md:m-2 md:w-12 md:h-12 p-2 m-0.5 w-10 h-10 text-center select-none z-10 uppercase;
   }
   .letter-start-bg {
     @apply bg-gray-500 hover:bg-gray-600 letter-text;
@@ -68,19 +66,32 @@
     @apply outline outline-gray-400 outline-8;
   }
   .button-blue {
-    @apply bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-2;
+    @apply bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-1 focus:outline-cyan-900;
   }
 
   .form-check-input {
+    @apply bg-gray-500;
     margin-top: .1rem;
     background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
     background-position: 0;
     transition: background-position .15s ease-in-out;
   }
   .form-check-input:checked {
+    @apply bg-cyan-600;
     background-position: 100%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
-    background-color: rgb(8, 145, 178);
+  }
+  .settings-box {
+    @apply p-2 m-0.5 outline outline-1 outline-slate-600 rounded-md;
+  }
+  .settings-box-2 {
+    @apply settings-box col-span-2;
+  }
+  .settings-box-3 {
+    @apply settings-box col-span-3;
+  }
+  .settings-box-4 {
+    @apply settings-box col-span-4;
   }
 
   .text-slot {
@@ -89,9 +100,15 @@
     overflow: hidden;
   }
   .text-slot.spin {
-    animation: slot-y 0.1s infinite;
+    animation: slot-y 0.2s infinite;
     text-shadow: 0 0 32px white;
     color: transparent;
+  }
+  .text-slot.spin:before {
+    content: attr(title);
+    display: block;
+    text-shadow: 0 0 14px white;
+    animation-delay: 0.2s;
   }
   .text-slot.intro {
     animation: slot-y-intro 0.5s 3;

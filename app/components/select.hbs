@@ -1,6 +1,6 @@
-<select class="appearance-none button-blue transition ease-in-out" aria-label="keyboard select"
+<select class="button-blue transition ease-in-out" aria-label="keyboard select"
       ...attributes>
         {{#each @options as |o|}}
-          <option value={{o.value}} selected={{is-selected o.value this.selected}} >{{o.name}}</option>
+          <option value={{o.value}} {{@setSelected o.value @selected}} >{{o.name}}</option>
         {{/each}}
 </select>

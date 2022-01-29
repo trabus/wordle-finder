@@ -1,18 +1,21 @@
 {{page-title "WordleFinder"}}
 
-<div class="text-6xl my-4 mx-auto uppercase font-black text-slate-200">
-    <div class="text-center flex flex-nowrap place-content-center cursor-default overflow-hidden" {{on "click" this.toggleSpin}}>
+<div class="text-4xl sm:text-6xl my-4 mx-auto uppercase font-black text-slate-200">
+    <div class="text-center h-10 sm:h-auto flex flex-nowrap place-content-center cursor-default overflow-hidden" {{on "click" this.toggleSpin}}>
         <div class="pr-3">Wordle</div>
         <div id="title-slot" 
             class="text-slot intro"
-            {{did-insert (perform this.initWordFinder)}}    
+            title={{this.title}}
+            {{this.initFinder}}
         >{{this.title}}</div>
     </div>
 </div>
-<section class="container mx-auto mt-4">
+<div class="fixed top-2 left-2 scale-150">
+    <button type="button" {{on "click" this.toggleSettings}}>⚙️</button></div>
+<section class="container mx-auto px-4 mt-4">
     {{#if this.wordFinder.isReady}}
-        <div class="grid lg:grid-cols-2 grid-cols-1 gap-2">
-            <div class="grid grid-cols-5 place-items-center">
+        <div class="grid grid-cols-1 gap-1 sm:gap-2">
+            <div class="grid grid-cols-5 place-items-center w-3/4 sm:w-3/5 md:w-1/2 mx-auto">
                 <Tray @name="1" @id="good0" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good0Letters}} class="tray-single good-border" />
                 <Tray @name="2" @id="good1" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good1Letters}} class="tray-single good-border" />
                 <Tray @name="3" @id="good2" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good2Letters}} class="tray-single good-border" />
@@ -22,32 +25,14 @@
             <Tray @name="found" @id="bad" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.badLetters}} class="tray-group tray-half bad-border" />
         </div>
         <div>
-            {{!-- <Tray @name="excluded" @id="dead" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.deadLetters}} class="tray-group tray-full dead-border" /> --}}
-        </div>
-        <div>
             <Tray @id="start" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.trayLetters}} class="tray-group tray-full" >
-                {{!-- <div class="col-span-full justify-content-center text-center row-span-full mb-6">
-                    {{#unless this.wordFinder.lettersPlaced}}
-                        <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
-                        ☝️ drag some letters up!☝️
-                        </h3>
-                    {{/unless}}
-                    <h3 class="text-green-600 opacity-80">
-                        👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
-                    </h3>
-                </div> --}}
-                <div class="col-span-full pr-4 flex">
-                    <Select @options={{this.wordFinder.keyboardOptions}} value={{this.wordFinder.keyboard}} {{on "change" this.selectKeyboard}} /> 
-                    <div class="">
-                        <span class="flex">
-                            <Toggle {{on "input" this.toggleAlpha}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle>
-                        </span>
-                        <span class="flex">
-                            <Toggle {{on "input" this.toggleCommon}} @id="common-words" @checked={{this.wordFinder.useCommon}} >use common words</Toggle>
-                        </span>
+                <div class="lg:col-end-12 md:col-end-10 sm:col-end-8 col-end-6 col-span-2 mt-3 flex">
+                    <div class="m-2">
+                        <button type="button" class="button-blue" {{on "click" this.wordFinder.reset}}>Reset</button>
                     </div>
-                    <button class="button-blue" type="button" {{on "click" this.wordFinder.reset}}>Reset</button>
-                    <span class="">{{this.startLetterLength}}</span>
+                    <div class="pt-6">
+                        {{this.startLetterLength}}
+                    </div>
                 </div>
             </Tray>
             <div class="col-span-full justify-content-center text-center row-span-full mb-6">
@@ -94,12 +79,10 @@
             </div>
         {{/if}}
     {{else}}
-        <div class="container text-center mt-12 text-green-500 animate-pulse">
+        <div class="container text-center mt-12 text-green-500 text-2xl animate-pulse">
             ...Building Word List
         </div>
     {{/if}}
+    <Settings @wordFinder={{this.wordFinder}} @showModal={{this.showSettings}} @onClose={{this.toggleSettings}} />
 </section>
-{{!-- <div class="text-6xl mx-auto text-center flex place-content-center overflow-hidden">
-    <div class="blur-text text-slot" {{on "click" this.toggleSpin}}>A</div>A
-</div> --}}
 {{outlet}}

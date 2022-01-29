@@ -4,7 +4,7 @@ module.exports = function (environment) {
   let ENV = {
     modulePrefix: 'wordle-assist',
     environment,
-    rootURL: '/',
+    rootURL: '/wordle',
     locationType: 'auto',
     EmberENV: {
       FEATURES: {
@@ -44,7 +44,7 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    ENV.rootURL = '/wordle';
+    // ENV.rootURL = '/wordle';
     // here you can enable a production-specific feature
   }
 
