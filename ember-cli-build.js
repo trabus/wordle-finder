@@ -14,7 +14,7 @@ const purgeCSS = {
     ],
     defaultExtractor: (content) => content.match(/[A-Za-z0-9-_:/.]+/g) || [],
     safelist: {
-      greedy: [/letter$/, /slot$/, /form-check-input$/],
+      greedy: [/letter$/, /slot$/, /form-check-input$/, /tray$/, /settings$/],
       keyframes: [/slot$/],
     },
   },
