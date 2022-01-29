@@ -10,6 +10,7 @@ export default class ApplicationController extends Controller {
   titles;
   usedTitles;
   @tracked title = '';
+  @tracked showSettings = false;
   @service router;
 
   constructor() {
@@ -84,30 +85,18 @@ export default class ApplicationController extends Controller {
     }
     return title;
   }
-  selectKeyboard = (e) => {
-    this.wordFinder.keyboard = e.target.value;
+  /**
+   * ACTIONS
+   */
+  toggleSettings = () => {
+    this.showSettings = !this.showSettings;
   };
-  toggleCommon = (e) => {
-    this.wordFinder.useCommon = e.target.checked;
-    this.wordFinder.updateSettings();
-  };
-  toggleAlpha = (e) => {
-    this.wordFinder.sortAlpha = e.target.checked;
-    this.wordFinder.updateSettings();
-  };
-  toggleWordInfo = (e) => {
-    this.wordFinder.showWordInfo = e.target.checked;
-  };
-  toggleLetterInfo = (e) => {
-    this.wordFinder.showLetterInfo = e.target.checked;
-  };
+
+  /**
+   * MODIFIERS
+   */
   initFinder = modifier(() => {
     this.initWordFinder.perform();
-  });
-  setSelected = modifier((element, [value, selected]) => {
-    const isSelected = value === selected;
-    console.log(value, selected, isSelected);
-    if (isSelected) element.setAttribute('selected', '');
   });
 }
 
@@ -118,12 +107,16 @@ export default class ApplicationController extends Controller {
  3a. make current instruction a flyout
  3b. show bouncing "drag some letters up" after timeout, make position fixed
  4. duplicate good letter support? allow for more than one of the same letter in good slots
- 5. more caching and tuning for performance
+ 5. keyboard layout using grid classes contextually applied
  6. add spinner or something for processing time, also disable buttons or toggle to prevent thrashing
- 7. use qwerty keyboard, keep keys in place
+ 7. improve performance by processing words in small batches and yielding content, more caching and tuning for performance
  8. fix letter and word info, currently not displaying properly in prod
  9. AWS ember-cli-deploy?
  10. double click to move to bad?
+
+ CSS tweaks:
+ settings:
+ * align close button end, add x close
  
  Decide on final name, maybe get input from friends 
  OR slot machine cycle/animate through a set of synonyms for assist on intro, 
