@@ -2,18 +2,13 @@
    @dragStartHook={{this.dragStartHook}} 
    @dragEndHook={{this.dragEndHook}} 
    @isDraggable={{this.isDraggable}}
-   @content={{@value}} 
+   @content={{@value}}
+   data-letter={{@value.name}}
    role="button" 
    class={{concat "letter-object " this.letterBg}}
-   {{on "click" this.toggleDead}}
+   {{on "click" (fn @toggleDead @value)}}
    {{on "mouseenter" (fn this.hoverShowData true)}}
    {{on "mouseleave" (fn this.hoverShowData false)}}
    ...attributes>
    {{@value.name}}
 </DraggableObject>
-{{#if this.showInfo}}
-   <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
-   The letter <span class="font-black text-pink-600 text-3xl uppercase">{{@value.name}}</span> appears <span class="font-bold text-indigo-400">{{this.letterCount}}</span> times. 
-   This makes up <span class="font-bold text-violet-300">{{this.letterFrequency}}%</span> of all of the letters in the <span class="text-indigo-400 font-bold">{{@wordFinder.totalWordCount}}</span> words used in this app.
-   </div>
-{{/if}}

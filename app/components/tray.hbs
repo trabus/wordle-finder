@@ -1,11 +1,9 @@
-<DraggableObjectTarget @action={{fn @wordFinder.updateList @id}} class="container bg-neutral-900/[.5]" ...attributes>
+<DraggableObjectTarget @action={{fn @api.updateList @id}} class="container bg-neutral-900/[.5]" ...attributes>
     <span class="absolute bottom opacity-10 select-none z-0">{{@name}}</span>
     {{#if @letters}}
         {{#each @letters as |letter|}}
-            <Letter @value={{letter}} @trayId={{@id}} @wordFinder={{@wordFinder}} />
+            <Letter @value={{letter}} @trayId={{@id}} @wordFinder={{@api.wordFinder}} @toggleDead={{fn @api.toggleDead letter}} />
         {{/each}}
-    {{else}}
-        {{yield}}
     {{/if}}
     {{yield}}
 </DraggableObjectTarget>

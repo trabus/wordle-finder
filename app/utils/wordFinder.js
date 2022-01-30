@@ -1,19 +1,16 @@
 import WordList from '../utils/word-list';
-import WordLists from '../utils/wordlist';
 import WordData from '../utils/word-data';
-import longProcess from '../utils/long-process';
 import { tracked } from '@glimmer/tracking';
 import { cached } from 'tracked-toolbox';
-import { task, lastValue } from 'ember-concurrency';
 
 export default class WordFinder {
+  static DISPLAY_COUNT = 500;
   letters;
   qwerty;
   letterData;
   letterList;
   commonList;
   groupList;
-  wordLists;
   wordList;
   wordData;
   keyboards;
@@ -32,17 +29,17 @@ export default class WordFinder {
   @tracked keyboard = 'qwerty';
   @tracked showLetterInfo = false;
   @tracked showWordInfo = false;
+  @tracked possibleWords = [];
+  @tracked possibleWordsDisplayCount = 0; //WordFinder.DISPLAY_COUNT;
 
   constructor() {
     const wordData = WordData();
-    this.wordLists = WordLists();
     this.wordList = WordList().words;
     this.wordData = new Map(wordData);
     this.letterList = new Map();
     this.groupList = new Map();
     this.commonList = wordData.map((word) => word[0]);
 
-    // console.log(this.wordList.length, this.commonList.length);
     this.keyboards = {
       alpha: {
         name: 'alpha',
@@ -53,7 +50,7 @@ export default class WordFinder {
       qwerty: {
         name: 'qwerty',
         value: 'qwerty',
-        order: 'qwertyuioplkjhgfdsazxcvbnm',
+        order: 'qwertyuiopasdfghjklzxcvbnm',
         values: [],
       },
       dvorak: {
@@ -65,7 +62,7 @@ export default class WordFinder {
       colemak: {
         name: 'colemak',
         value: 'colemak',
-        order: 'qwfpgjluyarstdhneiozxcbkm',
+        order: 'qwfpgjluyarstdhneiozxcvbkm',
         values: [],
       },
     };
@@ -81,7 +78,7 @@ export default class WordFinder {
 
   init() {
     this.buildLetterList();
-    return this.buildWordList.perform();
+    return this.buildWordList();
   }
 
   @cached
@@ -112,7 +109,7 @@ export default class WordFinder {
     );
     return letters;
   }
-  get keyboardOptions() {
+  get keyboardTypeOptions() {
     return Object.keys(this.keyboards).map((value) => this.keyboards[value]);
   }
   get badLetterValues() {
@@ -142,8 +139,6 @@ export default class WordFinder {
     });
     return goodLetters;
   }
-  @lastValue('getPossibleWords')
-  possibleWords = [];
 
   get possibleLetters() {
     const letters = Array.from(this.letterList.keys()).filter((k) => {
@@ -164,7 +159,7 @@ export default class WordFinder {
     );
   }
   get possibleWordCount() {
-    return this.possibleWords.length;
+    return this.possibleWords?.length || 0;
   }
 
   get foundLetters() {
@@ -190,20 +185,18 @@ export default class WordFinder {
     });
   };
 
-  @task
-  *buildWordKeys() {
+  buildWordKeys() {
     const words = [...this.wordList];
     const keys = [];
     while (words.length) {
-      const key = yield this.buildKeys.perform(words.splice(0, 1)[0]);
+      const key = this.buildKeys(words.splice(0, 1)[0]);
       keys.push(key);
     }
     return keys;
   }
 
-  @task
-  *buildWordList() {
-    const keyData = yield this.buildWordKeys.perform();
+  buildWordList() {
+    const keyData = this.buildWordKeys();
     keyData.forEach((data) => {
       const [word, keys] = data;
       keys.forEach((key) => {
@@ -215,39 +208,42 @@ export default class WordFinder {
     this.isReady = true;
   }
 
-  @task
-  *buildPermutations(word) {
-    function* perm(a, r) {
-      if (r.length <= 0) {
-        yield a;
-      } else {
-        yield* perm(a + r.charAt(0), r.substring(1, r.length));
-        yield* perm(a, r.substring(1, r.length));
-      }
-      yield a;
-    }
-    const result = yield [...perm('', word)];
-    return result;
-  }
-
-  @task
-  *buildKeys(word) {
+  buildKeys(word) {
     const letters = word.split('').sort();
-    // build letter info
-    letters.forEach((l) => {
-      const val = this.letterList.get(l);
-      val.count++;
-      val.frequency = (val.count / this.totalWordListLetterCount) * 100;
-      this.letterList.set(l, val);
+    // magic numbers, yes, but it's faster by x4
+    const indexes = [
+      '01234',
+      '0123',
+      '0124',
+      '012',
+      '0134',
+      '013',
+      '014',
+      '01',
+      '0234',
+      '023',
+      '024',
+      '02',
+      '034',
+      '03',
+      '04',
+      '0',
+    ];
+    const groupkeys = [];
+    letters.forEach((l, i) => {
+      indexes.forEach((v) => {
+        const keys = v.slice().split('');
+        const result = [];
+        keys.forEach((k) => {
+          result.push(letters[i + k * 1]);
+        });
+        // removing duplicate letters reduced groupList length from 20945 to 13994, but increases build time from 726ms to 1340ms
+        // TODO: determine if removing duplicates improves possible word finding times, or if they are needed for duplicate letter support
+        // groupkeys.push([...new Set(result)].join(''));
+        groupkeys.push(result.join(''));
+      });
     });
-    // identify keys of all possible sorted letter combos in word
-    const keys = yield this.buildPermutations.perform(word);
-    const sortedKeys = keys
-      .map((val) => {
-        return val.split('').sort().join('');
-      })
-      .sort();
-    return [word, [...new Set(sortedKeys)].slice(1)];
+    return [word, [...new Set(groupkeys)]];
   }
 
   // if string includes letters
@@ -257,10 +253,9 @@ export default class WordFinder {
       return includes || bool;
     }, false);
   }
-
-  @task
-  *getPossibleWords() {
-    console.log('possible');
+  // TODO: this slow function may need concurrent batching and cancellation
+  getPossibleWords() {
+    this.possibleWords = [];
     // don't return anything until a letter is placed
     if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
@@ -277,51 +272,49 @@ export default class WordFinder {
       words = this.deadLetterExclusion(this.deadLetterValues, inputList);
     }
     if (this.useCommon) {
-      yield longProcess();
-      words = [...words].filter((word) => {
+      const wordscopy = [...words];
+      words = wordscopy.filter((word) => {
         return this.commonList.includes(word);
       });
     }
 
     const uniqueWords = [...new Set(words)];
-    const filteredWords = uniqueWords.filter((word) => {
-      return !this.stringIncludesLetters(this.deadLetterValues, word);
-    });
-    const wordlog = {};
-    const deleted = {};
+    const filteredWords = [];
+    for (const word of uniqueWords) {
+      if (!this.stringIncludesLetters(this.deadLetterValues, word))
+        filteredWords.push(word);
+    }
+    // const wordlog = {};
+    // const deleted = {};
     if (Object.keys(this.goodLetterPositions).length) {
-      const filtered = yield filteredWords.filter((word) => {
+      const filtered = filteredWords.filter((word) => {
         const add = Object.keys(this.goodLetterPositions).reduce(
           (bool, index) => {
             if (!this.goodLetterPositions[index]) return bool;
             const match =
               word.charAt(index) === this.goodLetterPositions[index];
             // debugging log
-            wordlog[word] = {
-              match,
-              bool,
-              index,
-              word,
-              char: word.charAt(index),
-              pos: this.goodLetterPositions[index],
-            };
+            // wordlog[word] = {match,bool,index,word,char: word.charAt(index),pos: this.goodLetterPositions[index]};
             return match && bool;
           },
           true
         );
-        if (!add) {
-          // debugging log
-          deleted[word] = { ...wordlog[word] };
-          delete wordlog[word];
-        }
+        // if (!add) {
+        //   debugging log
+        //   deleted[word] = { ...wordlog[word] };
+        //   delete wordlog[word];
+        // }
         return add;
       });
-      // console.log('wordlog', wordlog);
-      // console.log('deleted', deleted);
-      // console.log('pos', this.goodLetterPositions);
-      return filtered;
+      // console.log('wordlog', wordlog, 'deleted', deleted);
+      words = filtered;
     }
-    return words;
+    this.possibleWords = words;
+    // set display count for possible words
+    this.possibleWordsDisplayCount =
+      words.length < WordFinder.DISPLAY_COUNT
+        ? words.length
+        : WordFinder.DISPLAY_COUNT;
   }
 
   updateLetters = (values) => {
@@ -333,7 +326,7 @@ export default class WordFinder {
   updateList = (...values) => {
     const [to, value] = values;
     const { name, from } = value;
-    // console.log(`to: ${to} , from ${from}`, value);
+    console.log(`to: ${to} , from ${from}`, value);
     const toKey = `${to}Letters`;
     const fromKey = `${from}Letters`;
     const fromList = [...this[fromKey]];
@@ -344,12 +337,9 @@ export default class WordFinder {
 
     // don't insert if already occupied
     if (to.includes('good') && this[toKey].length) return;
-    // remove item from fromList
-    // console.log('removing ', value, fromIndex, fromList[fromIndex], [
-    // ...fromList,
-    // ]);
+    // debugging log
+    // console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
 
-    // console.log('writing', to, toList);
     if (to.includes('good')) {
       value.from = to;
       this[toKey] = [{ ...value }];
@@ -364,11 +354,14 @@ export default class WordFinder {
       this[fromKey] = [...fromList];
     }
     // console.log(`updated ${to}`, [...this[to]]);
-    this.getPossibleWords.perform();
-    console.log(this);
+    this.getPossibleWords();
   };
   reset = () => {
     // console.log('reset!', this)
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
     return [
       ...this.good0Letters,
       ...this.good1Letters,
@@ -383,16 +376,17 @@ export default class WordFinder {
   };
 
   updateSettings = () => {
-    this.getPossibleWords.perform();
+    this.getPossibleWords();
   };
 
   deadLetterExclusion = (letters, keys) => {
     letters.sort();
-    if (!keys) return [];
+    if (!keys) {
+      return [];
+    }
     // go through all keys, remove any with an excluded letter
     return keys.filter((val) => {
       const includes = this.stringIncludesLetters(letters, val);
-      // console.log('includes', !includes, val);
       return !includes;
     });
   };
@@ -414,17 +408,17 @@ export default class WordFinder {
  * 3a. key is looked up on grouplist
  * 3b. word is pushed into grouplist value
  * 3c. grouplist is reassigned to key value
- * 4. 
- * 
+ * 4.
+ *
  * Processing flow:
  * 0. words are processed: see word process flow
  * 1. letter is placed/excluded
  * 2. key created with additive letters combined and sorted
  * 3. group is looked up by key
  * 4. letters
- * 
- * 
- * Improvments:
+ *
+ *
+ * Improvment ideas:
  * 1. cumalatively add letter counts while processing instead of re-processing all letters
  * 2. process main wordlist in batches of a limited size with EC so they are interruptable if inputs change
  * 3. process word exclusion in batches of limited size with EC so they are interruptable if

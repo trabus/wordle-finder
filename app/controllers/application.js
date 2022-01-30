@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
-import { task, timeout } from 'ember-concurrency';
+import { task, enqueueTask, timeout } from 'ember-concurrency';
 import WordFinder from '../utils/wordFinder';
 import { modifier } from 'ember-modifier';
 
@@ -10,7 +10,12 @@ export default class ApplicationController extends Controller {
   titles;
   usedTitles;
   @tracked title = '';
+  @tracked previousWords = [];
+  @tracked wordFeed = [];
   @tracked showSettings = false;
+  @tracked showAllWords = false;
+  @tracked baseHeight = 0;
+  @tracked inactive = false;
   @service router;
 
   constructor() {
@@ -45,10 +50,6 @@ export default class ApplicationController extends Controller {
     yield this.wordFinder.init();
     titleSlot.classList.toggle('spin');
   }
-  toggleSpin = (/* e */) => {
-    const titleSlot = document.querySelector('#title-slot');
-    this.spin.perform(titleSlot);
-  };
 
   @task
   *spin(el) {
@@ -57,6 +58,20 @@ export default class ApplicationController extends Controller {
     yield timeout(1000);
     el.classList.toggle('spin');
   }
+  @enqueueTask
+  *populateWords() {
+    const { possibleWords, previousWords } = this;
+    const last = previousWords.slice(-1)[0];
+    const start = last ? possibleWords.indexOf(last) : 0;
+    const feed = possibleWords.slice(start);
+    // console.log('populate', last, start, feed, possibleWords)
+    while (feed.length) {
+      let words = feed.splice(0, 5);
+      this.wordFeed = [...this.wordFeed, ...words];
+      yield timeout(10);
+    }
+    // console.log('words', wordFeed)
+  }
 
   get startLetterLength() {
     return this.wordFinder.startLetters.length;
@@ -64,7 +79,27 @@ export default class ApplicationController extends Controller {
   get processWordCount() {
     return this.wordFinder.possibleWordCount || this.wordFinder.totalWordCount;
   }
-
+  get possibleWords() {
+    // only return the first 500 unless requested
+    if (this.showAllWords) return this.wordFinder.possibleWords;
+    const result = this.wordFinder.possibleWords.slice(
+      0,
+      this.wordFinder.possibleWordsDisplayCount
+    );
+    return result;
+  }
+  get hasMoreWords() {
+    return this.possibleWords.length <= this.wordFinder.possibleWordCount;
+  }
+  get availHeight() {
+    return this.baseHeight + document.querySelector('body').scrollHeight;
+  }
+  get showPrompt() {
+    return this.inactive && !this.wordFinder.lettersPlaced;
+  }
+  get isMobile() {
+    return window.navigator.userAgentData.mobile;
+  }
   get wordContainerMessage() {
     return this.possibleWords?.length
       ? this.possibleWords.length > 500
@@ -73,6 +108,14 @@ export default class ApplicationController extends Controller {
       : this.wordFinder.lettersPlaced.length
       ? 'no possible words with placed letters!'
       : 'place some letters above!';
+  }
+  get api() {
+    const { wordFinder, updateList, toggleDead } = this;
+    return {
+      wordFinder,
+      updateList,
+      toggleDead,
+    };
   }
   getTitle() {
     let title = this.title;
@@ -88,8 +131,56 @@ export default class ApplicationController extends Controller {
   /**
    * ACTIONS
    */
+  updateList = (to, value) => {
+    // clear any inflight tasks
+    this.populateWords.cancelAll();
+    // clear wordFeed
+    this.wordFeed = [];
+    // update list
+    this.wordFinder.updateList(to, value);
+    this.populateWords.perform();
+  };
+  toggleDead = (value) => {
+    if (value.from === 'start') {
+      this.updateList('dead', value);
+    } else {
+      this.updateList('start', value);
+    }
+  };
+  toggleSpin = (/* e */) => {
+    const titleSlot = document.querySelector('#title-slot');
+    this.spin.perform(titleSlot);
+  };
   toggleSettings = () => {
     this.showSettings = !this.showSettings;
+  };
+  showMore = (count) => {
+    const { possibleWordsDisplayCount, possibleWordCount } = this.wordFinder;
+    if (this.populateWords.isRunning) {
+      return;
+    }
+    this.previousWords = [...this.wordFeed];
+    if (possibleWordsDisplayCount <= possibleWordCount)
+      this.wordFinder.possibleWordsDisplayCount += count;
+    if (
+      count === possibleWordCount ||
+      this.wordFinder.possibleWordsDisplayCount > possibleWordCount
+    )
+      this.wordFinder.possibleWordsDisplayCount = possibleWordCount;
+    this.populateWords.perform();
+  };
+  scrollTo = (pos) => {
+    this.baseHeight = ++this.baseHeight % 2;
+    window.scrollTo({
+      top: pos,
+      behavior: 'smooth',
+    });
+  };
+  reset = () => {
+    this.populateWords.cancelAll();
+    this.wordFinder.possibleWordsDisplayCount = 0;
+    this.wordFeed = [];
+    this.wordFinder.reset();
   };
 
   /**

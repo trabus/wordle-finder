@@ -7,9 +7,9 @@ export default class LetterComponent extends Component {
   get letterBg() {
     const { value } = this.args;
     if (value.from.includes('good')) {
-      return 'letter-good-bg';
+      return 'bg-letter-good';
     }
-    return `letter-${value.from}-bg`;
+    return `bg-letter-${value.from}`;
   }
   get showInfo() {
     return this.showData && this.args.wordFinder.showLetterInfo;
@@ -28,14 +28,7 @@ export default class LetterComponent extends Component {
   get letterFrequency() {
     return this.letterData.frequency.toFixed(2);
   }
-  toggleDead = () => {
-    const { wordFinder, value } = this.args;
-    if (value.from === 'start') {
-      wordFinder.updateList('dead', value);
-    } else {
-      wordFinder.updateList('start', value);
-    }
-  };
+  
   hoverShowData = (show) => {
     this.showData = show;
   };
