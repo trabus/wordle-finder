@@ -13,7 +13,7 @@
           <h2 class="uppercase text-3xl font-bold text-center w-full">Settings</h2>
         </div>
         <div class="settings-box-4 flex">
-          <Select @options={{this.wordFinder.keyboardOptions}} value={{this.wordFinder.keyboard}} @selected={{this.wordFinder.keyboard}} @setSelected={{this.setSelected}} {{on "change" this.selectKeyboard}} /> 
+          <Select @options={{this.wordFinder.keyboardTypeOptions}} value={{this.wordFinder.keyboard}} @selected={{this.wordFinder.keyboard}} @setSelected={{this.setSelected}} {{on "change" this.selectKeyboard}} /> 
           <div class="mt-2 ml-2">keyboard style</div>
         </div>
         <div class="settings-box-4">

@@ -10,72 +10,108 @@
         >{{this.title}}</div>
     </div>
 </div>
-<div class="fixed top-2 left-2 scale-150">
-    <button type="button" {{on "click" this.toggleSettings}}>⚙️</button></div>
-<section class="container mx-auto px-4 mt-4">
+<div class="fixed top-10 sm:left-2 left-0 grid grid-cols-1 md:gap-2">
+    {{#if this.wordFinder.isReady}}
+        <button type="button" class="md:scale-150 scale-100" {{on "click" this.toggleSettings}}>⚙️</button>
+        {{!-- <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo 0)}}>⬆️</button>
+        <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo this.availHeight)}}>⬇️</button> --}}
+        <div class="bg-slate-600 text-white sm:font-bold md:text-sm text-xs md:scale-100 scale-75 py-0 px-1.5 sm:m-auto ml-1 rounded-full select-none align-middle text-align-top">{{this.startLetterLength}}</div>
+    {{/if}}
+</div>
+<section class="container mx-auto px-1 md:px-4 pb-16 mt-4">
     {{#if this.wordFinder.isReady}}
         <div class="grid grid-cols-1 gap-1 sm:gap-2">
             <div class="grid grid-cols-5 place-items-center w-3/4 sm:w-3/5 md:w-1/2 mx-auto">
-                <Tray @name="1" @id="good0" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good0Letters}} class="tray-single good-border" />
-                <Tray @name="2" @id="good1" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good1Letters}} class="tray-single good-border" />
-                <Tray @name="3" @id="good2" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good2Letters}} class="tray-single good-border" />
-                <Tray @name="4" @id="good3" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good3Letters}} class="tray-single good-border" />
-                <Tray @name="5" @id="good4" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.good4Letters}} class="tray-single good-border" />
+                <Tray @name="1" @id="good0" @api={{this.api}} @letters={{this.wordFinder.good0Letters}} class="tray-single border-good" />
+                <Tray @name="2" @id="good1" @api={{this.api}} @letters={{this.wordFinder.good1Letters}} class="tray-single border-good" />
+                <Tray @name="3" @id="good2" @api={{this.api}} @letters={{this.wordFinder.good2Letters}} class="tray-single border-good" />
+                <Tray @name="4" @id="good3" @api={{this.api}} @letters={{this.wordFinder.good3Letters}} class="tray-single border-good" />
+                <Tray @name="5" @id="good4" @api={{this.api}} @letters={{this.wordFinder.good4Letters}} class="tray-single border-good" />
             </div>
-            <Tray @name="found" @id="bad" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.badLetters}} class="tray-group tray-half bad-border" />
+            <Tray @name="found" @id="bad" @api={{this.api}} @letters={{this.wordFinder.badLetters}} class="tray-group tray-half border-bad" />
         </div>
         <div>
-            <Tray @id="start" @wordFinder={{this.wordFinder}} @letters={{this.wordFinder.trayLetters}} class="tray-group tray-full" >
-                <div class="lg:col-end-12 md:col-end-10 sm:col-end-8 col-end-6 col-span-2 mt-3 flex">
-                    <div class="m-2">
-                        <button type="button" class="button-blue" {{on "click" this.wordFinder.reset}}>Reset</button>
-                    </div>
-                    <div class="pt-6">
-                        {{this.startLetterLength}}
-                    </div>
-                </div>
-            </Tray>
-            <div class="col-span-full justify-content-center text-center row-span-full mb-6">
-                    {{#unless this.wordFinder.lettersPlaced}}
-                        <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
-                        ☝️ drag some letters up!☝️
-                        </h3>
-                    {{/unless}}
-                    <h3 class="text-green-600 opacity-80">
-                        👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
+            <Tray @id="start" @api={{this.api}} @letters={{this.wordFinder.trayLetters}} class={{concat "tray-group keyboard " this.wordFinder.keyboard}} />
+            <div class="col-span-full justify-content-center text-center md:text-normal text-sm row-span-full">
+                {{#if this.showPrompt}}
+                    <h3 class="text-green-600 opacity-80 animate-pulse animate-bounce">
+                    ☝️ drag some letters up!☝️
                     </h3>
-                </div>
+                {{/if}}
+                <h3 class="text-green-600 opacity-80">
+                    👉 ↩️ &nbsp; click to exclude letters, click again to return to tray
+                </h3>
+                {{#if this.isMobile}}
+                    <h3 class="text-green-600 opacity-80">to drag, hold for a moment until a <span class="inline-block bg-green-600 text-white font-bold py-0 px-1.5 -mt-1.5 rounded-full select-none align-middle text-align-top">+</span> appears</h3>
+                {{/if}}
+            </div>
         </div>
-        {{#if this.wordFinder.getPossibleWords.isRunning}}
-            <div class="flex mx-auto text-green-400 text-center text-4xl font-black uppercase animate-pulse">Processing {{this.processWordCount}} possible words...</div>
+        {{#if this.populateWords.isRunning}}
+            <div class="flex justify-center w-full text-green-400 text-center text-xl font-bold animate-pulse">
+                Processing {{this.wordFeed.length}} possible words...
+            </div>
         {{/if}}
-        <div class="text-slate-400 text-2xl w-full text-center uppercase flex justify-center"><div class="text-slate-500 font-black px-2">{{this.wordFinder.possibleWordCount}}</div> <div class="px-2">Possible Words</div></div>
-        {{#if this.wordFinder.possibleWords}}
-            <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 border-orange-400 border-solid border-4 text-gray-400" ...attributes>
-                {{#each this.wordFinder.possibleWords as |word|}}
+        <div class="flex justify-center w-full text-slate-400 text-2xl text-center uppercase">
+            <div class="text-slate-500 font-black px-2">{{this.wordFinder.possibleWordCount}}</div> 
+            <div class="px-2">Possible Words</div>
+        </div>
+        {{#if this.wordFeed.length}}
+            <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 text-gray-400" ...attributes>
+                {{#each this.wordFeed as |word|}}
                     <Word @wordFinder={{this.wordFinder}} @word={{word}} />
-                {{else}}
-                    
                 {{/each}}
             </div>
-            {{#if this.debug}}
-                <div class="word-container">
-                    <div class="text-orange-800 p-2">
-                        {{#each this.wordFinder.lettersPlaced as |letter|}}
-                           <span class="is-dragging-object">{{letter.name}}</span>
-                        {{/each}}
+            {{!-- {{#if this.possibleWordsLength}}
+                <div class="container mx-auto text-center">
+                    <button type="button" class="text-green-400" {{on "click" (fn this.scrollTo "top")}}>☝️ return to top ☝️</button>
+                </div>
+            {{/if}} --}}
+            <div class="left-0 bottom-0 w-full pt-1 bg-slate-600/95 fixed">
+                <div class="grid grid-cols-12 w-full mx-auto align-items-center">
+                    <button type="button" class="button-blue min-w-fit col-span-2 sm:scale-100 scale-75" {{on "click" this.reset}}>Reset</button>
+                    {{#if this.hasMoreWords}}
+                        <div class="row-span-2 col-span-9 text-center text-sm">
+                            <div>
+                                showing {{this.wordFinder.possibleWordsDisplayCount}} of {{this.wordFinder.possibleWordCount}} possible words
+                            </div>
+                            <div>
+                                {{#if (lt this.wordFinder.possibleWordsDisplayCount this.wordFinder.possibleWordCount)}}
+                                    <button type="button" {{on "click" (fn this.showMore 500)}} class="button-show" disabled={{this.populateWords.isRunning}} >show more</button>
+                                {{/if}}
+                                {{#if (gte this.wordFinder.possibleWordsDisplayCount 1000)}}
+                                    <button type="button" {{on "click" (fn this.showMore -500)}} class="button-show" disabled={{this.populateWords.isRunning}}>show less</button>
+                                {{/if}}
+                                {{#if (lt this.wordFinder.possibleWordsDisplayCount this.wordFinder.possibleWordCount)}}
+                                    <button type="button" {{on "click" (fn this.showMore this.wordFinder.possibleWordCount)}} class="button-show" disabled={{this.populateWords.isRunning}}>show all</button>
+                                {{/if}}
+                            </div>
+                        </div>
+                    {{/if}}
+                    <div class="col-start-12 grid grid-cols-1">
+                        <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo 0)}}>⬆️</button>
+                        <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo this.availHeight)}}>⬇️</button>
                     </div>
                 </div>
-                <div class="hidden">
-                    <div class="letter-good-bg letter-bad-bg letter-dead-bg letter-start-bg"></div>
-                </div>
-            {{/if}}
+            </div>
         {{else}}
             <div class="word-container relative text-gray-800">
                 <div class="py-2 text-lg text-center w-full opacity-30">
                     {{this.wordContainerMessage}}
                 </div>
 
+            </div>
+        {{/if}}
+        {{#if this.showLetterInfo}}
+            <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
+            The letter <span class="font-black text-pink-600 text-3xl uppercase">{{@value.name}}</span> appears <span class="font-bold text-indigo-400">{{this.letterCount}}</span> times. 
+            This makes up <span class="font-bold text-violet-300">{{this.letterFrequency}}%</span> of all of the letters in the <span class="text-indigo-400 font-bold">{{@wordFinder.totalWordCount}}</span> words used in this app.
+            </div>
+        {{/if}}
+        {{#if this.showWordInfo}}
+            <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
+            <p>The word <span class="font-black text-pink-600 text-3xl uppercase">{{@word}}</span> is used
+            roughly <span class="font-bold text-indigo-400">{{this.wordData.frequency}}%</span> of the time in the documents used to compile this data.</p>
+            <p>It ranks <span class="font-bold text-violet-300">{{this.wordData.ranking}}</span> of the <span class="font-bold text-indigo-400">86799</span> words compiled <span class="text-xs italic">(only {{@wordFinder.totalWordCount}} of which are five letters long)</span>.</p>
             </div>
         {{/if}}
     {{else}}
