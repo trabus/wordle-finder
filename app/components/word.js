@@ -1,28 +1,61 @@
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
+import { task, timeout } from 'ember-concurrency';
 
 export default class WordComponent extends Component {
-  @tracked showData;
+  isShowing = false;
   get wordClass() {
     if (this.isCommon) {
       return 'text-gray-600 font-bold';
     }
     return '';
   }
-  get showInfo() {
-    return this.showData && this.args.wordFinder.showWordInfo;
-  }
   get wordData() {
-    return this.args.wordFinder.wordData.get(this.args.word);
+    return this.args.api.wordFinder.wordData.get(this.args.word);
   }
   get isCommon() {
     return this.commonList.includes(this.args.word);
   }
   get commonList() {
-    return [...this.args.wordFinder.commonList];
+    return [...this.args.api.wordFinder.commonList];
   }
-  hoverShowData = (show) => {
+  @task
+  *showData(show) {
+    const { word, api } = this.args;
+    if (!show) {
+      api.wordFinder.wordInfo = undefined;
+      this.isShowing = false;
+      this.showData.cancelAll();
+      return;
+    }
     if (!this.isCommon) return;
-    this.showData = show;
+    yield timeout(300);
+    this.isShowing = true;
+    const { wordData } = this;
+    const { frequency, ranking } = wordData;
+    api.wordFinder.letterInfo = undefined;
+    api.wordFinder.wordInfo = show
+      ? { word, wordData, frequency, ranking }
+      : undefined;
+    yield timeout(3500);
+    api.wordFinder.wordInfo = undefined;
+    this.isShowing = false;
+  }
+  clickShowData = () => {
+    if (this.showData.isRunning) {
+      console.log('cancel', this.showData)
+      this.showData.cancelAll();
+    }
+    this.showData.perform(true);
+  };
+  hoverShowData = (show) => {
+    const { api } = this.args;
+    if (api.isMobile) return;
+    this.showData.perform(show);
+  };
+  touchShowData = () => {
+    const { api } = this.args;
+    if (!api.isMobile) return;
+    if (this.isShowing) this.showData.cancelAll();
+    this.showData.perform(true);
   };
 }

@@ -1,5 +1,11 @@
 {{page-title "WordleFinder"}}
-
+<div class="p-1 w-full text-right">
+    <a href="https://github.com/trabus/wordle-finder">
+        <svg height="32" aria-hidden="true" viewBox="0 0 16 16" width="32" data-view-component="true" class="inline-block fill-slate-800 v-align-middle">
+            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+    </a>
+</div>
 <div class="text-4xl sm:text-6xl my-4 mx-auto uppercase font-black text-slate-200">
     <div class="text-center h-10 sm:h-auto flex flex-nowrap place-content-center cursor-default overflow-hidden" {{on "click" this.toggleSpin}}>
         <div class="pr-3">Wordle</div>
@@ -10,11 +16,11 @@
         >{{this.title}}</div>
     </div>
 </div>
-<div class="fixed top-10 sm:left-2 left-0 grid grid-cols-1 md:gap-2">
+<div class="fixed top-1 sm:left-2 left-0 grid grid-cols-1 md:gap-2">
     {{#if this.wordFinder.isReady}}
-        <button type="button" class="md:scale-150 scale-100" {{on "click" this.toggleSettings}}>⚙️</button>
-        {{!-- <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo 0)}}>⬆️</button>
-        <button type="button" class="md:scale-150 scale-100" {{on "click" (fn this.scrollTo this.availHeight)}}>⬇️</button> --}}
+        <button type="button" class="md:scale-150 scale-100" {{on "click" this.toggleSettings}}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="inline-block fill-slate-800 v-align-middle"><path d="M24 13.616v-3.232c-1.651-.587-2.694-.752-3.219-2.019v-.001c-.527-1.271.1-2.134.847-3.707l-2.285-2.285c-1.561.742-2.433 1.375-3.707.847h-.001c-1.269-.526-1.435-1.576-2.019-3.219h-3.232c-.582 1.635-.749 2.692-2.019 3.219h-.001c-1.271.528-2.132-.098-3.707-.847l-2.285 2.285c.745 1.568 1.375 2.434.847 3.707-.527 1.271-1.584 1.438-3.219 2.02v3.232c1.632.58 2.692.749 3.219 2.019.53 1.282-.114 2.166-.847 3.707l2.285 2.286c1.562-.743 2.434-1.375 3.707-.847h.001c1.27.526 1.436 1.579 2.019 3.219h3.232c.582-1.636.75-2.69 2.027-3.222h.001c1.262-.524 2.12.101 3.698.851l2.285-2.286c-.744-1.563-1.375-2.433-.848-3.706.527-1.271 1.588-1.44 3.221-2.021zm-12 2.384c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z"/></svg>    
+        </button>
         <div class="bg-slate-600 text-white sm:font-bold md:text-sm text-xs md:scale-100 scale-75 py-0 px-1.5 sm:m-auto ml-1 rounded-full select-none align-middle text-align-top">{{this.startLetterLength}}</div>
     {{/if}}
 </div>
@@ -58,7 +64,7 @@
         {{#if this.wordFeed.length}}
             <div class="word-container grid grid-flow-row lg:grid-cols-8 md:grid-cols-6 grid-cols-4 auto-rows-fr gap-x-6 text-gray-400" ...attributes>
                 {{#each this.wordFeed as |word|}}
-                    <Word @wordFinder={{this.wordFinder}} @word={{word}} />
+                    <Word @api={{this.api}} @word={{word}} />
                 {{/each}}
             </div>
             {{!-- {{#if this.possibleWordsLength}}
@@ -98,27 +104,35 @@
                 <div class="py-2 text-lg text-center w-full opacity-30">
                     {{this.wordContainerMessage}}
                 </div>
-
+                {{#if this.wordFinder.lettersPlaced.length}}
+                    <div class="w-full text-center">
+                        <button type="button" class="button-blue min-w-fit col-span-2 sm:scale-100 scale-75" {{on "click" this.reset}}>Reset</button>
+                    </div>
+                {{/if}}
             </div>
         {{/if}}
-        {{#if this.showLetterInfo}}
-            <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
-            The letter <span class="font-black text-pink-600 text-3xl uppercase">{{@value.name}}</span> appears <span class="font-bold text-indigo-400">{{this.letterCount}}</span> times. 
-            This makes up <span class="font-bold text-violet-300">{{this.letterFrequency}}%</span> of all of the letters in the <span class="text-indigo-400 font-bold">{{@wordFinder.totalWordCount}}</span> words used in this app.
-            </div>
+        {{#if (and this.wordFinder.letterInfo this.wordFinder.showLetterInfo)}}
+            {{#let this.wordFinder.letterInfo as |info|}}
+                <div class="fixed text-center bottom-20 left-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100" {{on "click" this.hideInfo}}>
+                    The letter <span class="font-black text-pink-600 text-3xl uppercase">{{info.letter}}</span> appears <span class="font-bold text-indigo-400">{{info.letterCount}}</span> times. 
+                    This makes up <span class="font-bold text-violet-300">{{info.letterFrequency}}%</span> of all of the letters in the <span class="text-indigo-400 font-bold">{{if this.wordFinder.useCommon this.wordFinder.totalCommonCount this.wordFinder.totalWordCount}}</span> {{if this.wordFinder.useCommon 'common'}} words used in this app.
+                </div>
+            {{/let}}
         {{/if}}
-        {{#if this.showWordInfo}}
-            <div class="fixed text-center bottom-0 right-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100">
-            <p>The word <span class="font-black text-pink-600 text-3xl uppercase">{{@word}}</span> is used
-            roughly <span class="font-bold text-indigo-400">{{this.wordData.frequency}}%</span> of the time in the documents used to compile this data.</p>
-            <p>It ranks <span class="font-bold text-violet-300">{{this.wordData.ranking}}</span> of the <span class="font-bold text-indigo-400">86799</span> words compiled <span class="text-xs italic">(only {{@wordFinder.totalWordCount}} of which are five letters long)</span>.</p>
-            </div>
+        {{#if (and this.wordFinder.wordInfo this.wordFinder.showWordInfo)}}
+            {{#let this.wordFinder.wordInfo as |info|}}
+                <div class="fixed text-center bottom-20 left-0 w-full h-18 px-20 pt-2 pb-4 text-slate-100 bg-slate-800/[.95] z-100" {{on "click" this.hideInfo}}>
+                    <p>The word <span class="font-black text-pink-600 text-3xl uppercase">{{info.word}}</span> is used
+                    roughly <span class="font-bold text-indigo-400">{{info.frequency}}%</span> of the time in the documents used to compile this data.</p>
+                    <p>It ranks <span class="font-bold text-violet-300">{{info.ranking}}</span> of the <span class="font-bold text-indigo-400">86799</span> words compiled <span class="text-xs italic">(only {{this.wordFinder.totalWordCount}} of which are five letters long)</span>.</p>
+                </div>
+            {{/let}}
         {{/if}}
     {{else}}
         <div class="container text-center mt-12 text-green-500 text-2xl animate-pulse">
             ...Building Word List
         </div>
     {{/if}}
-    <Settings @wordFinder={{this.wordFinder}} @showModal={{this.showSettings}} @onClose={{this.toggleSettings}} />
+    <Settings @wordFinder={{this.wordFinder}} @showModal={{this.showSettings}} @onClose={{this.toggleSettings}} @updateSettings={{this.updateSettings}} />
 </section>
 {{outlet}}

@@ -17,16 +17,19 @@
           <div class="mt-2 ml-2">keyboard style</div>
         </div>
         <div class="settings-box-4">
-          <Toggle {{on "input" this.toggleAlpha}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle>
+          <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.wordFinder.autoExclude}}>automatically exclude letters</Toggle>
         </div>
         <div class="settings-box-4">
-          <Toggle {{on "input" this.toggleCommon}} @id="common-words" @checked={{this.wordFinder.useCommon}} >use common words</Toggle>
+          <Toggle {{on "input" (fn this.toggleSetting "sortAlpha" true)}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle>
         </div>
         <div class="settings-box-4">
-          <Toggle {{on "input" this.toggleWordInfo}} @id="showWordInfo" @checked={{this.wordFinder.showWordInfo}} >show word info</Toggle>
+          <Toggle {{on "input" (fn this.toggleSetting "useCommon" true)}} @id="commonWords" @checked={{this.wordFinder.useCommon}} >show only common words</Toggle>
         </div>
         <div class="settings-box-4">
-          <Toggle {{on "input" this.toggleLetterInfo}} @id="showLetterInfo" @checked={{this.wordFinder.showLetterInfo}} >show letter info</Toggle>
+          <Toggle {{on "input" (fn this.toggleSetting "showWordInfo" false)}} @id="showWordInfo" @checked={{this.wordFinder.showWordInfo}} >show word info</Toggle>
+        </div>
+        <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "showLetterInfo" false)}} @id="showLetterInfo" @checked={{this.wordFinder.showLetterInfo}} >show letter info</Toggle>
         </div>
         <div class="col-span-4">
           <button type="button" class="button-blue mt-3" {{on "click" modal.close}}>

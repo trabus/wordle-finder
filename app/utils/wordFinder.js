@@ -7,6 +7,7 @@ export default class WordFinder {
   static DISPLAY_COUNT = 500;
   letters;
   qwerty;
+  letterCounts;
   letterData;
   letterList;
   commonList;
@@ -26,7 +27,10 @@ export default class WordFinder {
   @tracked isReady = false;
   @tracked useCommon = true;
   @tracked sortAlpha = false;
+  @tracked autoExclude = false;
   @tracked keyboard = 'qwerty';
+  @tracked letterInfo;
+  @tracked wordInfo;
   @tracked showLetterInfo = false;
   @tracked showWordInfo = false;
   @tracked possibleWords = [];
@@ -70,36 +74,52 @@ export default class WordFinder {
       this.keyboards[type].values = this.keyboards[type].order.split('');
     });
     this.letters = [...this.keyboards.alpha.values];
-    this.letterData = this.keyboards.alpha.values.map((l) => {
-      return { name: l, from: 'start' };
-    });
+    this.letterCounts = {};
+    this.letterData = [];
+    for (const l of this.letters) {
+      this.letterCounts[l] = { all: 0, common: 0 };
+      this.letterData.push({ name: l, from: 'start' });
+    }
     this.startLetters = [...this.letterData];
   }
 
   init() {
-    this.buildLetterList();
     return this.buildWordList();
   }
 
   @cached
   get totalWordListLetterCount() {
-    return (this.wordList && this.wordList.join('').split('').length) || 0;
+    return this?.wordList.join('').split('').length || 0;
   }
+  @cached
+  get totalCommonListLetterCount() {
+    return this?.commonList.join('').split('').length || 0;
+  }
+  @cached
   get totalWordCount() {
     return this.wordList.length;
   }
-  get trayLetters() {
-    const sortArray = this.keyboards[this.keyboard].values;
-    const letters = [
-      ...this.startLetters,
-      ...this.deadLetters,
+  @cached
+  get totalCommonCount() {
+    return this.commonList.length;
+  }
+  get allLetterData() {
+    return [...this.startLetters, ...this.lettersPlaced];
+  }
+  get lettersPlaced() {
+    return [
       ...this.badLetters,
+      ...this.deadLetters,
       ...this.good0Letters,
       ...this.good1Letters,
       ...this.good2Letters,
       ...this.good3Letters,
       ...this.good4Letters,
-    ].reduce(
+    ];
+  }
+  get trayLetters() {
+    const sortArray = this.keyboards[this.keyboard].values;
+    const letters = this.allLetterData.reduce(
       (sorted, letter) => {
         const { name } = letter;
         sorted[sortArray.indexOf(name)] = { ...letter };
@@ -150,6 +170,10 @@ export default class WordFinder {
     });
     return possibleLetters;
   }
+  // all letters included in found words
+  get foundWordLetters() {
+    return [...new Set(this.possibleWords.join('').split(''))];
+  }
 
   get possibleLettersByFrequency() {
     return new Map(
@@ -167,22 +191,35 @@ export default class WordFinder {
       (letter) => Boolean(letter)
     );
   }
-  get lettersPlaced() {
-    return [
-      ...this.badLetters,
-      ...this.deadLetters,
-      ...this.good0Letters,
-      ...this.good1Letters,
-      ...this.good2Letters,
-      ...this.good3Letters,
-      ...this.good4Letters,
-    ];
+
+  get excludedLetters() {
+    return Array.from(this.letterList.keys()).filter((k) => {
+      return !this.foundWordLetters.includes(k);
+    });
+  }
+
+  get tooManyFoundLetters() {
+    return this.foundLetters.length >= 5;
+  }
+
+  isCommon(word) {
+    return this.commonList.includes(word);
   }
 
   buildLetterList = () => {
-    this.letters.forEach((v) => {
-      this.letterList.set(v, { count: 0, frequency: 0 });
-    });
+    for (const v of this.letters) {
+      const count = this.letterCounts[v].all;
+      const commonCount = this.letterCounts[v].common;
+      const frequency = (count / this.totalWordListLetterCount) * 100;
+      const commonFrequency =
+        (commonCount / this.totalCommonListLetterCount) * 100;
+      this.letterList.set(v, {
+        count,
+        frequency,
+        commonCount,
+        commonFrequency,
+      });
+    }
   };
 
   buildWordKeys() {
@@ -197,18 +234,20 @@ export default class WordFinder {
 
   buildWordList() {
     const keyData = this.buildWordKeys();
-    keyData.forEach((data) => {
+    for (const data of keyData) {
       const [word, keys] = data;
-      keys.forEach((key) => {
+      for (const key of keys) {
         const words = this.groupList.get(key) || [];
         words.push(word);
         this.groupList.set(key, words);
-      });
-    });
+      }
+    }
+    this.buildLetterList();
     this.isReady = true;
   }
 
   buildKeys(word) {
+    const isCommon = this.isCommon(word);
     const letters = word.split('').sort();
     // magic numbers, yes, but it's faster by x4
     const indexes = [
@@ -230,19 +269,24 @@ export default class WordFinder {
       '0',
     ];
     const groupkeys = [];
-    letters.forEach((l, i) => {
-      indexes.forEach((v) => {
+    for (let i = 0, len = letters.length; i < len; i++) {
+      for (const v of indexes) {
         const keys = v.slice().split('');
         const result = [];
-        keys.forEach((k) => {
+        for (const k of keys) {
+          const counts = this.letterCounts[letters[i]];
+          // push in letter at predefined key offset from current letter (multiply to coerce to int)
           result.push(letters[i + k * 1]);
-        });
+          // inc counts
+          counts.all++;
+          if (isCommon) counts.common++;
+        }
         // removing duplicate letters reduced groupList length from 20945 to 13994, but increases build time from 726ms to 1340ms
         // TODO: determine if removing duplicates improves possible word finding times, or if they are needed for duplicate letter support
         // groupkeys.push([...new Set(result)].join(''));
         groupkeys.push(result.join(''));
-      });
-    });
+      }
+    }
     return [word, [...new Set(groupkeys)]];
   }
 
@@ -253,15 +297,21 @@ export default class WordFinder {
       return includes || bool;
     }, false);
   }
-  // TODO: this slow function may need concurrent batching and cancellation
+
   getPossibleWords() {
     this.possibleWords = [];
-    // don't return anything until a letter is placed
-    if (!this.foundLetters.length && !this.deadLetters.length) return [];
     const groupKey = this.foundLetters.sort().join('');
+    const keyExists = this.groupList.has(groupKey);
+    // don't return anything until a letter is placed, or if we have too many found letters
+    if (
+      (!this.foundLetters.length && !this.deadLetters.length) ||
+      (this.tooManyFoundLetters && !keyExists)
+    )
+      return [];
     let words = this.groupList.get(groupKey) || [];
+
     // nonexistent key, no deadletters placed
-    if (!words.length && !this.deadLetters.length) return [];
+    if (!keyExists && !this.deadLetters.length) return [];
     // we hit an nonexistent key, use deadletters
     if (!words.length) {
       const inputList = this.useCommon
@@ -322,6 +372,42 @@ export default class WordFinder {
       this[key] = Array.isArray(value) ? [...value] : { ...value };
     }
   };
+  // takes arrays ['dead',{name:'a',from:'start'}],['bad',{name:'c',from:'start'}]
+  // OR a single map `{ dead: [{name:'a',from:'start'}, {name:'b',from:'bad'}]}
+  batchUpdate = (...letters) => {
+    let batch = letters;
+    if (letters[0] instanceof Map) {
+      // convert map to 2d array
+      batch = [];
+      letters[0].forEach((items, to) => {
+        items.forEach((value) => {
+          batch.push([to, value]);
+        });
+      });
+    }
+    batch.forEach((item) => {
+      this.updateList(...item);
+    });
+    this.getPossibleWords();
+  };
+
+  batchExclude = (...letters) => {
+    const items = this.allLetterData
+      .map((letterData) => {
+        if (letters.includes(letterData.name)) return letterData;
+      })
+      .filter(Boolean);
+    this.batchUpdate(new Map([['dead', items]]));
+  };
+
+  updateLetter = (...values) => {
+    this.updateList(...values);
+    this.getPossibleWords();
+    if (this.autoExclude) {
+      this.batchExclude(...this.excludedLetters);
+      // console.log('excluded', this.excludedLetters);
+    }
+  };
 
   updateList = (...values) => {
     const [to, value] = values;
@@ -331,11 +417,21 @@ export default class WordFinder {
     const fromKey = `${from}Letters`;
     const fromList = [...this[fromKey]];
     const toList = [...this[toKey]];
-    const fromIndex = fromList.findIndex((v, i) => {
+    const fromIndex = fromList.findIndex((v) => {
       return v.name === name;
     });
-
+    // don't accept more letters if full
+    if (this.tooManyFoundLetters) {
+      if (
+        to.includes('bad') &&
+        (!from.includes('bad') || !from.includes('good'))
+      )
+        return;
+      if (to.includes('good') && from.includes('good') && this[toKey].length)
+        return;
+    }
     // don't insert if already occupied
+    // TODO: add swap functionality
     if (to.includes('good') && this[toKey].length) return;
     // debugging log
     // console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
@@ -354,7 +450,6 @@ export default class WordFinder {
       this[fromKey] = [...fromList];
     }
     // console.log(`updated ${to}`, [...this[to]]);
-    this.getPossibleWords();
   };
   reset = () => {
     // console.log('reset!', this)
@@ -362,17 +457,10 @@ export default class WordFinder {
       top: 0,
       behavior: 'smooth',
     });
-    return [
-      ...this.good0Letters,
-      ...this.good1Letters,
-      ...this.good2Letters,
-      ...this.good3Letters,
-      ...this.good4Letters,
-      ...this.badLetters,
-      ...this.deadLetters,
-    ].forEach((value) => {
+    this.lettersPlaced.forEach((value) => {
       this.updateList('start', value);
     });
+    this.getPossibleWords();
   };
 
   updateSettings = () => {
