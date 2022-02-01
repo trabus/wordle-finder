@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { cached } from 'tracked-toolbox';
 import { task, enqueueTask, timeout } from 'ember-concurrency';
 import WordFinder from '../utils/wordFinder';
 import { modifier } from 'ember-modifier';
@@ -62,9 +63,9 @@ export default class ApplicationController extends Controller {
   *populateWords() {
     const { possibleWords, previousWords } = this;
     const last = previousWords.slice(-1)[0];
-    const start = last ? possibleWords.indexOf(last) : 0;
+    const start = last ? possibleWords.indexOf(last) + 1 : 0;
     const feed = possibleWords.slice(start);
-    // console.log('populate', last, start, feed, possibleWords)
+    console.log('populate', last, start, feed, possibleWords)
     while (feed.length) {
       let words = feed.splice(0, 5);
       this.wordFeed = [...this.wordFeed, ...words];
@@ -72,7 +73,10 @@ export default class ApplicationController extends Controller {
     }
     // console.log('words', wordFeed)
   }
-
+  @cached
+  get isMobile() {
+    return window.navigator.userAgent.includes('Mobile');
+  }
   get startLetterLength() {
     return this.wordFinder.startLetters.length;
   }
@@ -97,9 +101,6 @@ export default class ApplicationController extends Controller {
   get showPrompt() {
     return this.inactive && !this.wordFinder.lettersPlaced;
   }
-  get isMobile() {
-    return window.navigator.userAgentData.mobile;
-  }
   get wordContainerMessage() {
     return this.possibleWords?.length
       ? this.possibleWords.length > 500
@@ -110,10 +111,11 @@ export default class ApplicationController extends Controller {
       : 'place some letters above!';
   }
   get api() {
-    const { wordFinder, updateList, toggleDead } = this;
+    const { isMobile, wordFinder, updateLetter, toggleDead } = this;
     return {
+      isMobile,
       wordFinder,
-      updateList,
+      updateLetter,
       toggleDead,
     };
   }
@@ -128,32 +130,49 @@ export default class ApplicationController extends Controller {
     }
     return title;
   }
+  resetPossibleWords() {
+    this.populateWords.cancelAll();
+    this.wordFinder.possibleWordsDisplayCount = 0;
+    this.wordFeed = [];
+    this.previousWords = [];
+  }
   /**
    * ACTIONS
    */
-  updateList = (to, value) => {
+  updateSettings = () => {
+    this.wordFinder.updateSettings();
+    this.resetPossibleWords();
+    this.wordFinder.getPossibleWords();
+    this.populateWords.perform();
+  };
+
+  updateLetter = (to, value) => {
     // clear any inflight tasks
     this.populateWords.cancelAll();
     // clear wordFeed
     this.wordFeed = [];
     // update list
-    this.wordFinder.updateList(to, value);
+    this.wordFinder.updateLetter(to, value);
     this.populateWords.perform();
   };
+
   toggleDead = (value) => {
     if (value.from === 'start') {
-      this.updateList('dead', value);
+      this.updateLetter('dead', value);
     } else {
-      this.updateList('start', value);
+      this.updateLetter('start', value);
     }
   };
+
   toggleSpin = (/* e */) => {
     const titleSlot = document.querySelector('#title-slot');
     this.spin.perform(titleSlot);
   };
+
   toggleSettings = () => {
     this.showSettings = !this.showSettings;
   };
+
   showMore = (count) => {
     const { possibleWordsDisplayCount, possibleWordCount } = this.wordFinder;
     if (this.populateWords.isRunning) {
@@ -169,6 +188,10 @@ export default class ApplicationController extends Controller {
       this.wordFinder.possibleWordsDisplayCount = possibleWordCount;
     this.populateWords.perform();
   };
+  hideInfo = () => {
+    this.wordFinder.letterInfo = undefined;
+    this.wordFinder.wordInfo = undefined;
+  };
   scrollTo = (pos) => {
     this.baseHeight = ++this.baseHeight % 2;
     window.scrollTo({
@@ -176,10 +199,9 @@ export default class ApplicationController extends Controller {
       behavior: 'smooth',
     });
   };
+
   reset = () => {
-    this.populateWords.cancelAll();
-    this.wordFinder.possibleWordsDisplayCount = 0;
-    this.wordFeed = [];
+    this.resetPossibleWords();
     this.wordFinder.reset();
   };
 
@@ -204,6 +226,27 @@ export default class ApplicationController extends Controller {
  8. fix letter and word info, currently not displaying properly in prod
  9. AWS ember-cli-deploy?
  10. double click to move to bad?
+ 11. calculate "wordle score" for word combos?
+ 12. exclusion mode - automatically exclude letters not included in found list
+
+We should implement these in a way where they are simply toggles and the data is truly decoupled from the UI
+ UI ideas:
+ 1. Tap to place:
+  * tapping once selects and puts an outline on the letter, tapping the button again deselects
+  * when selected, tap a tray to place
+  * either hold or double tap to exclude
+
+ 2. Remote drag/joystick
+  * dragging works like ios space bar
+  * options:
+    * drag moves a button icon
+    * drag moves a cursor and highlights destinations
+
+ 3. Side drawer letter trays
+  * can be left or right
+  * drag triggered? 
+ 3b. Side drawer list
+  * list is contained in side drawer that can be hidden and dragged in to keep out of way?
 
  CSS tweaks:
  settings:

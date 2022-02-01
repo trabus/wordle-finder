@@ -7,9 +7,9 @@
 @import "utilities.css";
 
 @layer components {
-  /* .tray-full {
-    @apply lg:grid-cols-12 md:grid-cols-10 sm:grid-cols-8 grid-cols-6 max-w-3xl;
-  } */
+  .no-touch-callout {
+    /* -webkit-touch-callout: none; */
+  }
   .tray-half {
     @apply grid-cols-5 max-w-md;
   }

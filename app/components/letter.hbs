@@ -9,6 +9,8 @@
    {{on "click" (fn @toggleDead @value)}}
    {{on "mouseenter" (fn this.hoverShowData true)}}
    {{on "mouseleave" (fn this.hoverShowData false)}}
+   {{on "touchstart" (fn this.touchShowData true)}}
+   {{on "touchend" (fn this.touchShowData false)}}
    ...attributes>
    {{@value.name}}
 </DraggableObject>

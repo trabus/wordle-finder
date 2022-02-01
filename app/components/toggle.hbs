@@ -3,5 +3,5 @@
   type="checkbox" 
   role="switch"
   checked={{@checked}}
-  id="switch" ...attributes>
-<label class="form-check-label inline-block mx-2" for="switch">{{yield}}</label>
+  id={{concat "switch" @id}} ...attributes>
+<label class="form-check-label inline-block mx-2" for={{concat "switch" @id}}>{{yield}}</label>

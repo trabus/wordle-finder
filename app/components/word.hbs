@@ -1,6 +1,9 @@
 <div 
-   {{on "mouseenter" (fn this.hoverShowData true)}}
+   {{on "click" (fn this.clickShowData)}}
+   {{on "touchstart" (fn this.touchShowData true)}}
+   {{!-- {{on "mouseenter" (fn this.hoverShowData true)}}
    {{on "mouseleave" (fn this.hoverShowData false)}}
-  class={{concat "p-2 text-center uppercase cursor-help select-none " this.wordClass}}>
+   {{on "touchend" (fn this.touchShowData false)}} --}}
+  class={{concat "p-2 text-center uppercase select-none no-touch-callout" (if this.isCommon "cursor-help ") this.wordClass}}>
     {{@word}}
 </div>
