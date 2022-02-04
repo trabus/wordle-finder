@@ -39,8 +39,9 @@ module.exports = function (defaults) {
         includePaths: ['app'],
         cacheInclude: [/.*\.hbs$/, /.*\.css$/, /.*\.html/],
         plugins: [
+          { module: require('postcss-import') },
           require('tailwindcss')('./app/tailwind.config.js'),
-          ...(isProduction ? [purgeCSS] : []),
+          // ...(isProduction ? [purgeCSS] : []),
         ],
       },
     },

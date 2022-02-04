@@ -6,7 +6,6 @@ import { cached } from 'tracked-toolbox';
 export default class WordFinder {
   static DISPLAY_COUNT = 500;
   letters;
-  qwerty;
   letterCounts;
   letterData;
   letterList;
@@ -78,7 +77,7 @@ export default class WordFinder {
     this.letterData = [];
     for (const l of this.letters) {
       this.letterCounts[l] = { all: 0, common: 0 };
-      this.letterData.push({ name: l, from: 'start' });
+      this.letterData.push({ name: l, from: 'start', auto: false });
     }
     this.startLetters = [...this.letterData];
   }
@@ -191,15 +190,34 @@ export default class WordFinder {
       (letter) => Boolean(letter)
     );
   }
-
-  get excludedLetters() {
+  get shouldExcludeLetters() {
+    //
     return Array.from(this.letterList.keys()).filter((k) => {
       return !this.foundWordLetters.includes(k);
     });
   }
+  get autoExcludedLetters() {
+    return this.allLetterData.filter((letter) => {
+      return letter.from === 'dead' && letter.auto;
+    });
+    // .map((letter) => letter.name);
+  }
+  get manualExcludedLetters() {
+    return this.allLetterData.filter((letter) => {
+      return letter.from === 'dead' && !letter.auto;
+    });
+    // .map((letter) => letter.name);
+  }
+
+  get excludedLetters() {
+    if (!this.autoExclude) return [...this.deadLetterValues];
+  }
 
   get tooManyFoundLetters() {
-    return this.foundLetters.length >= 5;
+    return (
+      (this.badLetters.length > 0 && !this.possibleWordCount) ||
+      this.foundLetters.length >= 5
+    );
   }
 
   isCommon(word) {
@@ -391,22 +409,40 @@ export default class WordFinder {
     this.getPossibleWords();
   };
 
-  batchExclude = (...letters) => {
-    const items = this.allLetterData
-      .map((letterData) => {
-        if (letters.includes(letterData.name)) return letterData;
-      })
-      .filter(Boolean);
-    this.batchUpdate(new Map([['dead', items]]));
+  // used for auto exclusion
+  batchExclude = (...excluded) => {
+    // get all letter data to cycle through
+    const batch = new Map([
+      ['dead', []],
+      ['start', []],
+    ]);
+    this.allLetterData.forEach((letterData) => {
+      if (excluded.includes(letterData.name)) {
+        if (!this.foundLetters.length) {
+        }
+        if (letterData.from !== 'dead') letterData.auto = true;
+        let dead = batch.get('dead');
+        batch.set('dead', [...dead, letterData]);
+      } else {
+        if (letterData.from === 'dead') {
+          letterData.auto = false;
+          let start = batch.get('start');
+          batch.set('start', [...start, letterData]);
+        }
+      }
+    });
+    this.batchUpdate(batch);
   };
 
   updateLetter = (...values) => {
+    values.auto = false;
     this.updateList(...values);
     this.getPossibleWords();
     if (this.autoExclude) {
       this.batchExclude(...this.excludedLetters);
       // console.log('excluded', this.excludedLetters);
     }
+    console.log(this);
   };
 
   updateList = (...values) => {
@@ -436,18 +472,18 @@ export default class WordFinder {
     // debugging log
     // console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
 
-    if (to.includes('good')) {
-      value.from = to;
-      this[toKey] = [{ ...value }];
-    } else {
+    if (!to.includes('good')) {
       value.from = to;
       this[toKey] = [...toList, { ...value }];
-    }
-    if (from.includes('good')) {
-      this[fromKey] = [];
     } else {
+      value.from = to;
+      this[toKey] = [{ ...value }];
+    }
+    if (!from.includes('good')) {
       if (to !== from) fromList.splice(fromIndex, 1);
       this[fromKey] = [...fromList];
+    } else {
+      this[fromKey] = [];
     }
     // console.log(`updated ${to}`, [...this[to]]);
   };

@@ -10,11 +10,13 @@ export default class ApplicationController extends Controller {
   wordFinder;
   titles;
   usedTitles;
+  @tracked isReady = false;
   @tracked title = '';
   @tracked previousWords = [];
   @tracked wordFeed = [];
   @tracked showSettings = false;
   @tracked showAllWords = false;
+  @tracked showInstructions = false;
   @tracked baseHeight = 0;
   @tracked inactive = false;
   @service router;
@@ -22,27 +24,37 @@ export default class ApplicationController extends Controller {
   constructor() {
     super(...arguments);
     this.wordFinder = new WordFinder();
-    this.usedTitles = ['finder'];
+    this.usedTitles = ['Finder'];
     this.titles = [
-      'helper',
-      'assist',
-      'boost',
-      'relief',
-      'support',
-      'guide',
-      'advice',
-      'aide',
-      'service',
-      'genie',
-      'usher',
-      'scout',
-      'spotter',
+      'Helper',
+      'Assist',
+      'Boost',
+      'Relief',
+      'Support',
+      'Guide',
+      'Advisor',
+      'Aide',
+      'Service',
+      'Genie',
+      'Usher',
+      'Scout',
+      'Spotter',
+      'Explorer',
+      'Buddy',
+      'Utility',
+      'Prompt',
+      'Searcher',
+      'Attendant',
+      'Succor',
+      'Powerup',
+      'Auxiliary',
+      'Concierge',
     ];
   }
   @task
   *initWordFinder() {
     const titleSlot = document.querySelector('#title-slot');
-    this.title = 'finder';
+    this.title = 'Finder';
     yield timeout(500);
     titleSlot.classList.toggle('intro');
     yield timeout(100);
@@ -50,6 +62,8 @@ export default class ApplicationController extends Controller {
     yield timeout(500);
     yield this.wordFinder.init();
     titleSlot.classList.toggle('spin');
+    yield timeout(1000);
+    this.isReady = true;
   }
 
   @task
@@ -65,11 +79,11 @@ export default class ApplicationController extends Controller {
     const last = previousWords.slice(-1)[0];
     const start = last ? possibleWords.indexOf(last) + 1 : 0;
     const feed = possibleWords.slice(start);
-    console.log('populate', last, start, feed, possibleWords)
+    console.log('populate', last, start, feed, possibleWords);
     while (feed.length) {
       let words = feed.splice(0, 5);
       this.wordFeed = [...this.wordFeed, ...words];
-      yield timeout(10);
+      yield timeout(6);
     }
     // console.log('words', wordFeed)
   }
@@ -95,8 +109,11 @@ export default class ApplicationController extends Controller {
   get hasMoreWords() {
     return this.possibleWords.length <= this.wordFinder.possibleWordCount;
   }
+  get wordContainer() {
+    return document.querySelector('.word-container');
+  }
   get availHeight() {
-    return this.baseHeight + document.querySelector('body').scrollHeight;
+    return this.baseHeight + this.wordContainer.scrollHeight;
   }
   get showPrompt() {
     return this.inactive && !this.wordFinder.lettersPlaced;
@@ -172,6 +189,9 @@ export default class ApplicationController extends Controller {
   toggleSettings = () => {
     this.showSettings = !this.showSettings;
   };
+  toggleInstructions = () => {
+    this.showInstructions = !this.showInstructions;
+  };
 
   showMore = (count) => {
     const { possibleWordsDisplayCount, possibleWordCount } = this.wordFinder;
@@ -194,7 +214,7 @@ export default class ApplicationController extends Controller {
   };
   scrollTo = (pos) => {
     this.baseHeight = ++this.baseHeight % 2;
-    window.scrollTo({
+    this.wordContainer.scrollTo({
       top: pos,
       behavior: 'smooth',
     });
@@ -211,6 +231,26 @@ export default class ApplicationController extends Controller {
   initFinder = modifier(() => {
     this.initWordFinder.perform();
   });
+  toggleClass = modifier((el, [eventName, className, classTarget]) => {
+    const target = classTarget ? document.querySelector(classTarget) : el;
+    console.log('t', el, className, eventName, classTarget, target);
+    const handler = (e) => {
+      console.log('toggle', e, className, classTarget, target);
+      target.classList.toggle(className);
+    };
+    if (!Array.isArray(eventName)) {
+      eventName = [eventName];
+    }
+    for (const ev of eventName) {
+      el.addEventListener(ev, handler);
+    }
+
+    return () => {
+      for (const ev of eventName) {
+        el.removeEventListener(ev, handler);
+      }
+    };
+  });
 }
 
 /**
@@ -223,11 +263,12 @@ export default class ApplicationController extends Controller {
  5. keyboard layout using grid classes contextually applied
  6. add spinner or something for processing time, also disable buttons or toggle to prevent thrashing
  7. improve performance by processing words in small batches and yielding content, more caching and tuning for performance
- 8. fix letter and word info, currently not displaying properly in prod
+ 8. stop body scroll when dragging (look at body-scroll-lock package)
  9. AWS ember-cli-deploy?
  10. double click to move to bad?
  11. calculate "wordle score" for word combos?
- 12. exclusion mode - automatically exclude letters not included in found list
+ 12. exclusion mode - automatically exclude letters not included in found list 
+ 13. BUG: this.wordFeed.length is 0, but then the wordContainerMessage is a large list of possible words comma seperated
 
 We should implement these in a way where they are simply toggles and the data is truly decoupled from the UI
  UI ideas:
@@ -251,6 +292,8 @@ We should implement these in a way where they are simply toggles and the data is
  CSS tweaks:
  settings:
  * align close button end, add x close
+ * add orientation media queries (portrait/landscape)
+ * add height media queries
  
  Decide on final name, maybe get input from friends 
  OR slot machine cycle/animate through a set of synonyms for assist on intro, 

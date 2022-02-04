@@ -6,9 +6,6 @@ export default class SettingsComponent extends Component {
   get wordFinder() {
     return this.args.wordFinder;
   }
-  get showModal() {
-    return this.args.showModal;
-  }
   /**
    * ACTIONS
    */

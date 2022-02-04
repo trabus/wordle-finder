@@ -9,7 +9,7 @@ export default class LetterComponent extends Component {
     if (value.from.includes('good')) {
       return 'bg-letter-good';
     }
-    return `bg-letter-${value.from}`;
+    return `bg-letter-${value.from}${value.auto ? ' auto' : ''}`;
   }
   get isDraggable() {
     const { value } = this.args;
@@ -60,6 +60,9 @@ export default class LetterComponent extends Component {
   };
 
   dragStartHook = (e) => {
+    // if (this.args.api.wordFinder.tooManyFoundLetters) {
+    //   e.target.setAttribute('draggable', false);
+    // }
     // console.log(e);
     html2canvas(e.target).then((canvas) => {
       canvas.globalAlpha = 0.5;
@@ -72,6 +75,7 @@ export default class LetterComponent extends Component {
     });
   };
   dragEndHook = (/*e*/) => {
-    // console.log(e);
+    // e.target.setAttribute('draggable', true);
+    // // console.log(e);
   };
 }

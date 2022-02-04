@@ -42,7 +42,7 @@ export default class WordComponent extends Component {
   }
   clickShowData = () => {
     if (this.showData.isRunning) {
-      console.log('cancel', this.showData)
+      console.log('cancel', this.showData);
       this.showData.cancelAll();
     }
     this.showData.perform(true);

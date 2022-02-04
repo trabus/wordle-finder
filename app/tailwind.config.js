@@ -944,6 +944,13 @@ module.exports = {
       40: '40',
       50: '50',
     },
+    extend: {
+      screens: {
+        tl: { raw: '(min-height: 800px)' },
+        sh: { raw: '(max-height: 550px)' },
+        sw: { raw: '(max-height: 550px) and (min-width: 500px)' },
+      },
+    },
   },
   variantOrder: [
     'first',

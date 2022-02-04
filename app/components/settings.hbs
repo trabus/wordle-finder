@@ -1,4 +1,4 @@
-{{#if this.showModal}}
+{{#if @showModal}}
 <div class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
   <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
   <ModalDialog
@@ -16,9 +16,10 @@
           <Select @options={{this.wordFinder.keyboardTypeOptions}} value={{this.wordFinder.keyboard}} @selected={{this.wordFinder.keyboard}} @setSelected={{this.setSelected}} {{on "change" this.selectKeyboard}} /> 
           <div class="mt-2 ml-2">keyboard style</div>
         </div>
-        <div class="settings-box-4">
+        
+        {{!-- <div class="settings-box-4">
           <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.wordFinder.autoExclude}}>automatically exclude letters</Toggle>
-        </div>
+        </div> --}}
         <div class="settings-box-4">
           <Toggle {{on "input" (fn this.toggleSetting "sortAlpha" true)}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle>
         </div>
