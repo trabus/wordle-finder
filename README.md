@@ -22,7 +22,7 @@ You will need the following things properly installed on your computer.
 
 * `ember serve`
 * Visit your app at [http://localhost:4200/wordle/](http://localhost:4200/wordle/).
-* Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
+* Visit your tests at [http://localhost:4200/wordle/tests](http://localhost:4200/wordle/tests).
 
 ### Code Generators
 
