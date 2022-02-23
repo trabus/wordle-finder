@@ -3,14 +3,16 @@
    @dragEndHook={{this.dragEndHook}} 
    @isDraggable={{this.isDraggable}}
    @content={{@value}}
-   data-letter={{@value.name}}
+   data-letter={{@value}}
    role="button" 
    class={{concat "letter-object " this.letterBg}}
-   {{on "click" (fn @toggleDead @value)}}
-   {{on "mouseenter" (fn this.hoverShowData true)}}
-   {{on "mouseleave" (fn this.hoverShowData false)}}
-   {{on "touchstart" (fn this.touchShowData true)}}
-   {{on "touchend" (fn this.touchShowData false)}}
+   tabindex="0"
+   aria-label={{concat @value " tile " this.location}}
+   {{on "click" @toggleDead}}
+   {{!-- {{on "mouseenter" (fn this.hoverShowData true)}} --}}
+   {{!-- {{on "mouseleave" (fn this.hoverShowData false)}} --}}
+   {{!-- {{on "touchstart" (fn this.touchShowData true)}} --}}
+   {{!-- {{on "touchend" (fn this.touchShowData false)}} --}}
    ...attributes>
-   {{@value.name}}
+   {{@value}}
 </DraggableObject>

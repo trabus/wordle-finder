@@ -13,25 +13,25 @@
           <h2 class="uppercase text-3xl font-bold text-center w-full">Settings</h2>
         </div>
         <div class="settings-box-4 flex">
-          <Select @options={{this.wordFinder.keyboardTypeOptions}} value={{this.wordFinder.keyboard}} @selected={{this.wordFinder.keyboard}} @setSelected={{this.setSelected}} {{on "change" this.selectKeyboard}} /> 
+          <Select @options={{this.settings.keyboardTypeOptions}} value={{this.settings.keyboard}} @selected={{this.settings.keyboard}} @setSelected={{this.setSelected}} {{on "change" this.selectKeyboard}} /> 
           <div class="mt-2 ml-2">keyboard style</div>
         </div>
         
+        <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.settings.autoExclude}}>automatically exclude letters</Toggle>
+        </div>
+        <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "sortAlpha" true)}} @id="alphabetical" @checked={{this.settings.sortAlpha}}>sort alphabetically</Toggle>
+        </div>
+        <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "useCommon" true)}} @id="commonWords" @checked={{this.settings.useCommon}} >show only common words</Toggle>
+        </div>
         {{!-- <div class="settings-box-4">
-          <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.wordFinder.autoExclude}}>automatically exclude letters</Toggle>
+          <Toggle {{on "input" (fn this.toggleSetting "showWordInfo" false)}} @id="showWordInfo" @checked={{this.settings.showWordInfo}} >show word info</Toggle>
+        </div>
+        <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "showLetterInfo" false)}} @id="showLetterInfo" @checked={{this.settings.showLetterInfo}} >show letter info</Toggle>
         </div> --}}
-        <div class="settings-box-4">
-          <Toggle {{on "input" (fn this.toggleSetting "sortAlpha" true)}} @id="alphabetical" @checked={{this.wordFinder.sortAlpha}}>sort alphabetically</Toggle>
-        </div>
-        <div class="settings-box-4">
-          <Toggle {{on "input" (fn this.toggleSetting "useCommon" true)}} @id="commonWords" @checked={{this.wordFinder.useCommon}} >show only common words</Toggle>
-        </div>
-        <div class="settings-box-4">
-          <Toggle {{on "input" (fn this.toggleSetting "showWordInfo" false)}} @id="showWordInfo" @checked={{this.wordFinder.showWordInfo}} >show word info</Toggle>
-        </div>
-        <div class="settings-box-4">
-          <Toggle {{on "input" (fn this.toggleSetting "showLetterInfo" false)}} @id="showLetterInfo" @checked={{this.wordFinder.showLetterInfo}} >show letter info</Toggle>
-        </div>
         <div class="col-span-4">
           <button type="button" class="button-blue mt-3" {{on "click" modal.close}}>
             Close

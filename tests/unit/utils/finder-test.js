@@ -1,10 +1,10 @@
-import wordlist from 'wordle-assist/utils/wordlist';
+import finder from 'wordle-assist/utils/finder';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | wordlist', function () {
+module('Unit | Utility | finder', function () {
   // TODO: Replace this with your real tests.
   test('it works', function (assert) {
-    let result = wordlist();
+    let result = finder();
     assert.ok(result);
   });
 });

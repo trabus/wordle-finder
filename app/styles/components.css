@@ -11,6 +11,9 @@
   .no-touch-callout {
     /* -webkit-touch-callout: none; */
   }
+  .tray-fifth {
+    @apply sm:grid-cols-2 grid-cols-1 max-w-md gap-4;
+  }
   .tray-half {
     @apply grid-cols-5 max-w-md;
   }
@@ -18,7 +21,7 @@
     @apply min-h-[3.5rem] min-w-[3.5rem];
   }
   .tray-group {
-    @apply md:my-3 my-2 px-6 py-1 mx-auto rounded-lg place-items-center grid tray-min;
+    @apply md:my-3 my-2 sm:px-1 px-6 py-1 mx-auto rounded-lg place-items-center grid tray-min;
   }
   .tray-single {
     @apply my-2 rounded-md w-12 h-12 md:w-16 md:h-16 place-items-center grid grid-cols-1 tray-min;
@@ -27,20 +30,14 @@
     @apply p-0 max-w-screen-sm gap-1;
   }
   .keyboard.alpha {
-    @apply grid-cols-9 max-w-md md:max-w-lg;
-  }
-  @media (min-width: 1024px) {
-    .keyboard.alpha {
-      @apply max-w-screen-xl gap-2;
-      grid-template-columns: repeat(13, minmax(0, 1fr));
-    }
+    @apply grid-cols-9 max-w-md sm:max-w-lg md:max-w-xl md:gap-2;
   }
   .keyboard.alpha > .letter-object[data-letter="s"],
   .keyboard.alpha > .letter-object[data-letter="j"] {
-    @apply col-start-2 lg:col-start-auto;
+    @apply col-start-2;
   }
   .keyboard.alpha > .letter-object:nth-child(n+11):nth-child(-n+18) {
-    @apply -ml-12 lg:ml-auto;
+    @apply -ml-12;
   }
 
   .keyboard.qwerty {
@@ -135,41 +132,41 @@
   .letter-object {
     @apply cursor-pointer rounded-md md:p-3 sm:p-2 p-1.5 md:w-12 md:h-12 sm:w-10 sm:h-10 w-9 h-9 text-center select-none z-10 uppercase;
   }
-  .bg-letter-start {
+  .bg-letter-s {
     @apply bg-gray-500 hover:bg-gray-600 letter-text;
   }
-  .bg-letter-good {
+  .bg-letter-g {
     @apply bg-green-600 hover:bg-green-900 letter-text;
   }
-  .bg-letter-bad {
+  .bg-letter-b {
     @apply bg-yellow-400 hover:bg-yellow-800 letter-text;
   }
-  .bg-letter-dead {
+  .bg-letter-d {
     @apply bg-gray-800 letter-text;
   }
-  .bg-letter-dead.auto {
+  .bg-letter-d.auto {
     @apply text-gray-300 outline outline-gray-300;
   }
-  .border-good {
+  .g-border {
     @apply border-solid border-4 border-green-600;
   }
-  .accepts-drag.border-good {
+  .accepts-drag.g-border {
     @apply outline outline-green-400 outline-8;
   }
-  .border-bad {
+  .b-border {
     @apply border-solid border-4 border-yellow-400;
   }
-  .accepts-drag.border-bad {
+  .accepts-drag.b-border {
     @apply outline outline-yellow-200 outline-8;
   }
-  .border-dead {
+  .d-border {
     @apply border-solid border-4 border-gray-600;
   }
-  .accepts-drag.border-dead {
+  .accepts-drag.d-border {
     @apply outline outline-gray-400 outline-8;
   }
   .button-blue {
-    @apply bg-cyan-600 text-gray-200 p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-1 focus:outline-cyan-900;
+    @apply bg-cyan-700 text-white p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-1 focus:outline-cyan-900;
   }
   .button-show {
     @apply text-white bg-gray-800 disabled:bg-gray-400 rounded-md outline-white outline outline-1 px-1 mt-1;
