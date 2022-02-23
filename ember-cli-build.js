@@ -39,8 +39,9 @@ module.exports = function (defaults) {
         includePaths: ['app'],
         cacheInclude: [/.*\.hbs$/, /.*\.css$/, /.*\.html/],
         plugins: [
+          { module: require('postcss-import') },
           require('tailwindcss')('./app/tailwind.config.js'),
-          ...(isProduction ? [purgeCSS] : []),
+          // ...(isProduction ? [purgeCSS] : []),
         ],
       },
     },
@@ -60,4 +61,6 @@ module.exports = function (defaults) {
   // along with the exports of each module as its value.
 
   return app.toTree();
+  // const { Webpack } = require('@embroider/webpack');
+  // return require('@embroider/compat').compatBuild(app, Webpack);
 };

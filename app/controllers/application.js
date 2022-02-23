@@ -1,55 +1,73 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
-import { tracked } from '@glimmer/tracking';
-import { cached } from 'tracked-toolbox';
-import { task, enqueueTask, timeout } from 'ember-concurrency';
-import WordFinder from '../utils/wordFinder';
+import { cached, tracked } from '@glimmer/tracking';
+import { task, timeout } from 'ember-concurrency';
+import { use } from 'ember-resources';
 import { modifier } from 'ember-modifier';
+import WordFeed from '../resources/word-feed';
 
+const DISPLAY_COUNT = 500;
 export default class ApplicationController extends Controller {
   wordFinder;
   titles;
   usedTitles;
+  @tracked isReady = false;
   @tracked title = '';
-  @tracked previousWords = [];
-  @tracked wordFeed = [];
+  @tracked possibleWordsDisplayCount = DISPLAY_COUNT;
   @tracked showSettings = false;
   @tracked showAllWords = false;
+  @tracked showInstructions = false;
   @tracked baseHeight = 0;
   @tracked inactive = false;
-  @service router;
+  @service settings;
+  @service word;
 
   constructor() {
     super(...arguments);
-    this.wordFinder = new WordFinder();
-    this.usedTitles = ['finder'];
+    this.usedTitles = ['Finder'];
     this.titles = [
-      'helper',
-      'assist',
-      'boost',
-      'relief',
-      'support',
-      'guide',
-      'advice',
-      'aide',
-      'service',
-      'genie',
-      'usher',
-      'scout',
-      'spotter',
+      'Helper',
+      'Assist',
+      'Boost',
+      'Relief',
+      'Support',
+      'Guide',
+      'Advisor',
+      'Aide',
+      'Service',
+      'Genie',
+      'Usher',
+      'Scout',
+      'Spotter',
+      'Explorer',
+      'Buddy',
+      'Utility',
+      'Prompt',
+      'Searcher',
+      'Attendant',
+      'Succor',
+      'Powerup',
+      'Auxiliary',
+      'Concierge',
     ];
+
+    this.word.initWordFinder.perform(this.settings);
   }
+
   @task
   *initWordFinder() {
     const titleSlot = document.querySelector('#title-slot');
-    this.title = 'finder';
+    this.title = 'Finder';
     yield timeout(500);
     titleSlot.classList.toggle('intro');
     yield timeout(100);
     titleSlot.classList.toggle('spin');
     yield timeout(500);
-    yield this.wordFinder.init();
+    yield this.wf.words.init();
+    // console.log(this.wf)
     titleSlot.classList.toggle('spin');
+    yield timeout(1000);
+    this.isReady = true;
   }
 
   @task
@@ -59,62 +77,73 @@ export default class ApplicationController extends Controller {
     yield timeout(1000);
     el.classList.toggle('spin');
   }
-  @enqueueTask
-  *populateWords() {
-    const { possibleWords, previousWords } = this;
-    const last = previousWords.slice(-1)[0];
-    const start = last ? possibleWords.indexOf(last) + 1 : 0;
-    const feed = possibleWords.slice(start);
-    console.log('populate', last, start, feed, possibleWords)
-    while (feed.length) {
-      let words = feed.splice(0, 5);
-      this.wordFeed = [...this.wordFeed, ...words];
-      yield timeout(10);
-    }
-    // console.log('words', wordFeed)
+
+  @use wordFeed = WordFeed.with(() => ({
+    wordList: this.wf.possibleWords,
+    displayCount: this.displayCount,
+    increment: 80,
+  }));
+
+  get wf() {
+    return this.word.finder;
   }
   @cached
   get isMobile() {
     return window.navigator.userAgent.includes('Mobile');
   }
   get startLetterLength() {
-    return this.wordFinder.startLetters.length;
+    return this.wf.sLetters.length;
   }
   get processWordCount() {
-    return this.wordFinder.possibleWordCount || this.wordFinder.totalWordCount;
+    return this.wf.possibleWordsCount || this.wf.totalWordCount;
   }
-  get possibleWords() {
-    // only return the first 500 unless requested
-    if (this.showAllWords) return this.wordFinder.possibleWords;
-    const result = this.wordFinder.possibleWords.slice(
-      0,
-      this.wordFinder.possibleWordsDisplayCount
-    );
-    return result;
+
+  get displayCount() {
+    return this.possibleWordsDisplayCount;
   }
+  set displayCount(value) {
+    this.possibleWordsDisplayCount = value;
+    if (value === 0) this.possibleWordsDisplayCount = DISPLAY_COUNT;
+    if (
+      value > this.wf.possibleWordsCount ||
+      (this.wf.possibleWordsCount < DISPLAY_COUNT &&
+        this.wf.possibleWordsCount !== 0)
+    ) {
+      this.possibleWordsDisplayCount = this.wf.possibleWordsCount;
+    }
+  }
+
   get hasMoreWords() {
-    return this.possibleWords.length <= this.wordFinder.possibleWordCount;
+    return this.displayCount <= this.wf.possibleWordsCount;
+  }
+  get wordContainer() {
+    return document.querySelector('.word-container');
   }
   get availHeight() {
-    return this.baseHeight + document.querySelector('body').scrollHeight;
+    return this.baseHeight + this.wordContainer.scrollHeight;
   }
   get showPrompt() {
-    return this.inactive && !this.wordFinder.lettersPlaced;
+    return this.inactive && !this.wf.lettersPlaced;
+  }
+  get showProcessingBar() {
+    return this.wordFeed.isRunning && this.wf.possibleWordsCount > 0;
   }
   get wordContainerMessage() {
-    return this.possibleWords?.length
-      ? this.possibleWords.length > 500
+    return this.wf.possibleWordsCount
+      ? this.wf.possibleWordsCount > 500
         ? ['too many words']
-        : this.wordFinder.possibleWords
-      : this.wordFinder.lettersPlaced.length
+        : 'processing...'
+      : this.wf.lettersPlaced.length
       ? 'no possible words with placed letters!'
       : 'place some letters above!';
   }
+
   get api() {
-    const { isMobile, wordFinder, updateLetter, toggleDead } = this;
+    const { isMobile, wf, updateLetter, toggleDead } = this;
     return {
       isMobile,
-      wordFinder,
+      wordFinder: wf,
+      getLetter: wf.getLetter,
       updateLetter,
       toggleDead,
     };
@@ -131,36 +160,28 @@ export default class ApplicationController extends Controller {
     return title;
   }
   resetPossibleWords() {
-    this.populateWords.cancelAll();
-    this.wordFinder.possibleWordsDisplayCount = 0;
-    this.wordFeed = [];
-    this.previousWords = [];
+    this.displayCount = 0;
   }
   /**
    * ACTIONS
    */
   updateSettings = () => {
-    this.wordFinder.updateSettings();
     this.resetPossibleWords();
-    this.wordFinder.getPossibleWords();
-    this.populateWords.perform();
   };
 
   updateLetter = (to, value) => {
-    // clear any inflight tasks
-    this.populateWords.cancelAll();
-    // clear wordFeed
-    this.wordFeed = [];
     // update list
-    this.wordFinder.updateLetter(to, value);
-    this.populateWords.perform();
+    this.wf.updateLetter(to, value);
+    this.displayCount = 0;
   };
 
   toggleDead = (value) => {
-    if (value.from === 'start') {
-      this.updateLetter('dead', value);
+    let letter = this.wf.getLetter(value);
+    if (letter.location === 's') {
+      // put it into d0 for manually excluded letters
+      this.updateLetter('d0', value);
     } else {
-      this.updateLetter('start', value);
+      this.updateLetter('s', value);
     }
   };
 
@@ -172,29 +193,32 @@ export default class ApplicationController extends Controller {
   toggleSettings = () => {
     this.showSettings = !this.showSettings;
   };
+  toggleInstructions = () => {
+    this.showInstructions = !this.showInstructions;
+  };
+  showUncommon = () => {
+    this.settings.useCommon = false;
+    this.updateSettings();
+  };
 
   showMore = (count) => {
-    const { possibleWordsDisplayCount, possibleWordCount } = this.wordFinder;
-    if (this.populateWords.isRunning) {
+    const { possibleWordsCount } = this.wf;
+    const { displayCount } = this;
+    if (this.wordFeed.isRunning) {
+      console.log('running');
       return;
     }
-    this.previousWords = [...this.wordFeed];
-    if (possibleWordsDisplayCount <= possibleWordCount)
-      this.wordFinder.possibleWordsDisplayCount += count;
-    if (
-      count === possibleWordCount ||
-      this.wordFinder.possibleWordsDisplayCount > possibleWordCount
-    )
-      this.wordFinder.possibleWordsDisplayCount = possibleWordCount;
-    this.populateWords.perform();
+    this.displayCount = count + displayCount;
+    if (count === possibleWordsCount || this.displayCount > possibleWordsCount)
+      this.displayCount = possibleWordsCount;
   };
   hideInfo = () => {
-    this.wordFinder.letterInfo = undefined;
-    this.wordFinder.wordInfo = undefined;
+    this.wf.letterInfo = undefined;
+    this.wf.wordInfo = undefined;
   };
   scrollTo = (pos) => {
     this.baseHeight = ++this.baseHeight % 2;
-    window.scrollTo({
+    this.wordContainer.scrollTo({
       top: pos,
       behavior: 'smooth',
     });
@@ -202,7 +226,7 @@ export default class ApplicationController extends Controller {
 
   reset = () => {
     this.resetPossibleWords();
-    this.wordFinder.reset();
+    this.wf.reset();
   };
 
   /**
@@ -210,6 +234,26 @@ export default class ApplicationController extends Controller {
    */
   initFinder = modifier(() => {
     this.initWordFinder.perform();
+  });
+  toggleClass = modifier((el, [eventName, className, classTarget]) => {
+    const target = classTarget ? document.querySelector(classTarget) : el;
+    // console.log('t', el, className, eventName, classTarget, target);
+    const handler = (e) => {
+      // console.log('toggle', e, className, classTarget, target);
+      target.classList.toggle(className);
+    };
+    if (!Array.isArray(eventName)) {
+      eventName = [eventName];
+    }
+    for (const ev of eventName) {
+      el.addEventListener(ev, handler);
+    }
+
+    return () => {
+      for (const ev of eventName) {
+        el.removeEventListener(ev, handler);
+      }
+    };
   });
 }
 
@@ -223,11 +267,12 @@ export default class ApplicationController extends Controller {
  5. keyboard layout using grid classes contextually applied
  6. add spinner or something for processing time, also disable buttons or toggle to prevent thrashing
  7. improve performance by processing words in small batches and yielding content, more caching and tuning for performance
- 8. fix letter and word info, currently not displaying properly in prod
+ 8. stop body scroll when dragging (look at body-scroll-lock package)
  9. AWS ember-cli-deploy?
  10. double click to move to bad?
  11. calculate "wordle score" for word combos?
- 12. exclusion mode - automatically exclude letters not included in found list
+ 12. exclusion mode - automatically exclude letters not included in found list 
+ 13. BUG: this.wordFeed.length is 0, but then the wordContainerMessage is a large list of possible words comma seperated
 
 We should implement these in a way where they are simply toggles and the data is truly decoupled from the UI
  UI ideas:
@@ -251,6 +296,8 @@ We should implement these in a way where they are simply toggles and the data is
  CSS tweaks:
  settings:
  * align close button end, add x close
+ * add orientation media queries (portrait/landscape)
+ * add height media queries
  
  Decide on final name, maybe get input from friends 
  OR slot machine cycle/animate through a set of synonyms for assist on intro, 

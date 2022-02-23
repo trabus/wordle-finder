@@ -1,1 +1,256 @@
+@layer components {
+  #interface, #word-feed {
+    @apply transition-all duration-200 ease-in-out opacity-0;
+  }
+  #word-feed {
+    @apply delay-100;
+  }
+  #interface.is-ready, #word-feed.is-ready {
+    @apply opacity-100;
+  }
+  .no-touch-callout {
+    /* -webkit-touch-callout: none; */
+  }
+  .tray-fifth {
+    @apply sm:grid-cols-2 grid-cols-1 max-w-md gap-4;
+  }
+  .tray-half {
+    @apply grid-cols-5 max-w-md;
+  }
+  .tray-min {
+    @apply min-h-[3.5rem] min-w-[3.5rem];
+  }
+  .tray-group {
+    @apply md:my-3 my-2 sm:px-1 px-6 py-1 mx-auto rounded-lg place-items-center grid tray-min;
+  }
+  .tray-single {
+    @apply my-2 rounded-md w-12 h-12 md:w-16 md:h-16 place-items-center grid grid-cols-1 tray-min;
+  }
+  .keyboard {
+    @apply p-0 max-w-screen-sm gap-1;
+  }
+  .keyboard.alpha {
+    @apply grid-cols-9 max-w-md sm:max-w-lg md:max-w-xl md:gap-2;
+  }
+  .keyboard.alpha > .letter-object[data-letter="s"],
+  .keyboard.alpha > .letter-object[data-letter="j"] {
+    @apply col-start-2;
+  }
+  .keyboard.alpha > .letter-object:nth-child(n+11):nth-child(-n+18) {
+    @apply -ml-12;
+  }
 
+  .keyboard.qwerty {
+    @apply grid-cols-10 max-w-lg md:max-w-xl;
+  }
+  .keyboard.qwerty > .letter-object[data-letter="a"] {
+    @apply col-start-2;
+  }
+  .keyboard.qwerty > .letter-object[data-letter="z"] {
+    @apply col-start-3;
+  }
+  .keyboard.qwerty > .letter-object:nth-child(n+12) {
+    @apply -ml-12;
+  }
+  
+  .keyboard.dvorak {
+    @apply grid-cols-10 max-w-lg md:max-w-xl;
+  }
+  .keyboard.dvorak > .letter-object[data-letter="p"] {
+    @apply col-start-3;
+  }
+  .keyboard.dvorak > .letter-object[data-letter="a"] {
+    @apply col-start-1;
+  }
+  .keyboard.dvorak > .letter-object[data-letter="q"] {
+    @apply col-start-2;
+  }
+  .keyboard.dvorak > .letter-object:nth-child(n+1):nth-child(-n+8) {
+    @apply -ml-12;
+  }
+  .keyboard.dvorak > .letter-object:nth-child(n+19) {
+    @apply -ml-10;
+  }
+  
+
+  .keyboard.colemak {
+    @apply grid-cols-10 max-w-lg md:max-w-xl;
+  }
+  .keyboard.colemak > .letter-object[data-letter="q"] {
+    @apply col-start-2;
+  }
+  .keyboard.colemak > .letter-object[data-letter="a"] {
+    @apply col-start-1;
+  }
+  .keyboard.colemak > .letter-object[data-letter="z"] {
+    @apply col-start-3;
+  }
+  .keyboard.colemak > .letter-object:nth-child(n+1):nth-child(-n+10) {
+    @apply -ml-12;
+  }
+  .keyboard.colemak > .letter-object:nth-child(n+21) {
+    @apply -ml-12;
+  }
+  
+  .collapse-content {
+    @apply transition-all transition-[height] duration-300 ease-in-out opacity-0 h-0;
+  }
+  .collapse.open > .collapse-content {
+    @apply opacity-100 w-fit h-fit;
+  }
+  .collapse {
+    @apply flex justify-center mx-auto w-full h-fit;
+  }
+
+  .info-prompt {
+    @apply mb-1 after:z-10 after:inline-block after:select-none after:py-0 after:px-1.5 after:leading-tight after:content-['?'] after:bg-slate-400 after:text-slate-800 after:text-sm after:rounded-full;
+  }
+
+  .info-overlay {
+    @apply fixed text-center bottom-1/2 left-0 w-full h-fit px-2 pt-2 pb-4 bg-slate-800/[.95] text-gray-200 z-50;
+  }
+  .word-container {
+    @apply absolute w-full mx-auto rounded-lg bg-gray-200 border-orange-400 border-solid border-4 
+    max-h-[calc(100vh_-_27rem)] md:max-h-[calc(100vh_-_33rem)] sm:max-h-[calc(100vh_-_30rem)] sw:max-h-[calc(100vh_-_9rem)] 
+    sh:z-40;
+  }
+  .word-container.slide-out {
+    @apply sh:bottom-[calc(3vh_-_(100vh_-_26rem))] sw:bottom-[calc(3vh_-_(100vh_-_31rem))];
+  }
+  .word-container.is-mobile {
+    @apply max-h-[calc(100vh_-_36rem)];
+  }
+  .word-feed {
+    @apply m-2 mb-3 justify-center;
+  }
+  .is-dragging-object {
+    @apply border-solid border-2 border-white leading-none;
+  }
+  .letter-text {
+    @apply text-white font-bold;
+  }
+  .letter-object {
+    @apply cursor-pointer rounded-md md:p-3 sm:p-2 p-1.5 md:w-12 md:h-12 sm:w-10 sm:h-10 w-9 h-9 text-center select-none z-10 uppercase;
+  }
+  .bg-letter-s {
+    @apply bg-gray-500 hover:bg-gray-600 letter-text;
+  }
+  .bg-letter-g {
+    @apply bg-green-600 hover:bg-green-900 letter-text;
+  }
+  .bg-letter-b {
+    @apply bg-yellow-400 hover:bg-yellow-800 letter-text;
+  }
+  .bg-letter-d {
+    @apply bg-gray-800 letter-text;
+  }
+  .bg-letter-d.auto {
+    @apply text-gray-300 outline outline-gray-300;
+  }
+  .g-border {
+    @apply border-solid border-4 border-green-600;
+  }
+  .accepts-drag.g-border {
+    @apply outline outline-green-400 outline-8;
+  }
+  .b-border {
+    @apply border-solid border-4 border-yellow-400;
+  }
+  .accepts-drag.b-border {
+    @apply outline outline-yellow-200 outline-8;
+  }
+  .d-border {
+    @apply border-solid border-4 border-gray-600;
+  }
+  .accepts-drag.d-border {
+    @apply outline outline-gray-400 outline-8;
+  }
+  .button-blue {
+    @apply bg-cyan-700 text-white p-1 border-solid border-2 border-slate-200 text-center rounded-md px-3 m-1 focus:outline-cyan-900;
+  }
+  .button-show {
+    @apply text-white bg-gray-800 disabled:bg-gray-400 rounded-md outline-white outline outline-1 px-1 mt-1;
+  }
+  .button-show.disabled {
+    @apply disabled:bg-gray-400;
+  }
+
+  .no-scroll {
+    overflow-y: hidden;
+  }
+
+  .form-check-input {
+    @apply bg-gray-500;
+    margin-top: .1rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
+    background-position: 0;
+    transition: background-position .15s ease-in-out;
+  }
+  .form-check-input:checked {
+    @apply bg-cyan-600;
+    background-position: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-4 -4 8 8%22%3E%3Ccircle r=%223%22 fill=%22%23fff%22/%3E%3C/svg%3E");
+  }
+  .settings-box {
+    @apply p-2 m-0.5 outline outline-1 outline-slate-600 rounded-md;
+  }
+  .settings-box-2 {
+    @apply settings-box col-span-2;
+  }
+  .settings-box-3 {
+    @apply settings-box col-span-3;
+  }
+  .settings-box-4 {
+    @apply settings-box col-span-4;
+  }
+
+  .text-slot {
+    animation: slot-stop 0.25s;
+    height: 4rem;
+    overflow: hidden;
+  }
+  .text-slot.spin {
+    animation: slot-y 0.2s infinite;
+    text-shadow: 0 0 32px white;
+    color: transparent;
+  }
+  .text-slot.spin:before {
+    content: attr(title);
+    display: block;
+    text-shadow: 0 0 14px white;
+    animation-delay: 0.2s;
+  }
+  .text-slot.intro {
+    animation: slot-y-intro 0.5s 3;
+  }
+  @keyframes slot-y-intro {
+    from {
+      transform: translateY(-100%);
+      text-shadow: 0 0 2px white; 
+      animation-timing-function: cubic-bezier(0, 1, 0, 0);
+    }
+    to {
+      transform: translateY(100%);
+      text-shadow: 0 0 0 white;
+    }
+  }
+  @keyframes slot-y {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes slot-stop {
+    from {
+      transform: translateY(-100%);
+      animation-timing-function: cubic-bezier(0, 1, -0.2, 1);
+      text-shadow: 0 0 13px white;
+    }
+    to {
+      transform: translateY(0);
+      text-shadow: 0 0 0 white;
+    }
+  }
+}

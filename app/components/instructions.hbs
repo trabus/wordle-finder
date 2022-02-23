@@ -1,0 +1,34 @@
+{{#if @showModal}}
+<div class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+  <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+  <ModalDialog
+    class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto"
+    @onClose={{@onClose}}
+    @onEscape={{@onClose}}
+    as |modal|
+  >
+    <div class="p-6 max-h-max bg-slate-800 radius-2 border border-3 border-white">
+      <div class="grid text-slate-200 grid-cols-4 grid-flow-row gap-1">
+        <div class="col-span-full">
+          <h2 class="uppercase text-3xl font-bold text-center w-full">Instructions</h2>
+        </div>
+        <div class="col-span-full justify-content-center text-center leading-loose m-0">
+            <p class="text-justify">Using included and excluded letters, this app can help you find all the possible 5 letter words using that set of letters.</p>
+             <p class="text-justify">By <span class="text-green-400">placing letters in the trays where letters match the exact position</span>, <span class="text-yellow-400">placing letters 
+              that are in the word but not in that tray's position</span>, and <span class="text-gray-400">excluding letters that are not in the 
+              word at all</span>, you will see the list of words update and hopefully reveal the word you're looking for.</p>
+            <h3 class="text-green-600 opacity-80">
+                👉 ↩️ &nbsp; click to exclude letters, click again to undo
+            </h3>
+            <h3 class="text-green-600 opacity-80">to drag, hold for a moment until a <span class="inline-block bg-green-600 text-white font-bold py-0 px-1.5 -mt-1 rounded-full leading-normal select-none align-middle text-align-top">+</span> appears</h3>
+        </div>
+        <div class="col-span-4">
+          <button type="button" class="button-blue mt-3" {{on "click" modal.close}}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </ModalDialog>
+</div>
+{{/if}}
