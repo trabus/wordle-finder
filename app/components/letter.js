@@ -24,17 +24,23 @@ export default class LetterComponent extends Component {
     const key = match ? match[1] : this.from;
     return locations[key];
   }
+
+  get autoExcluded() {
+    const { wordFinder, settings } = this.args.api;
+    return settings.autoExclude
+      ? wordFinder.shouldExcludeLetters.includes(this.value.name)
+      : false;
+  }
+
   get letterBg() {
-    const { value } = this;
     const match = this.from.match(/([a-z])([0-9])/);
-    // console.log('bg', value.auto, value)
     if (match) {
-      return `bg-letter-${match[1]}${value.auto ? ' auto' : ''}`;
+      return `bg-letter-${match[1]}`;
     }
-    return `bg-letter-${this.from}${value.auto ? ' auto' : ''}`;
+    return `bg-letter-${this.from}${this.autoExcluded ? ' autoExcluded' : ''}`;
   }
   get isDraggable() {
-    return !this.from.includes('d');
+    return !this.from.includes('d') && !this.autoExcluded;
   }
   // TODO: turn letterData into delegate class to collect letterInfo into one place
   // get letterData() {

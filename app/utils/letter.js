@@ -3,7 +3,6 @@ export default class Letter {
   #name;
   #history;
   @tracked locations;
-  @tracked auto = false;
 
   constructor(letter) {
     this.#name = letter;

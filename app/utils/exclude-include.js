@@ -22,7 +22,7 @@ export const stringIncludesLetters = (letters, value) => {
   // }, false);
 };
 
-export const positionsMatchWordLetters = (positions, word, exclude) => {
+export const positionsMatchWordLetters = ({ positions, word, exclude }) => {
   return Object.keys(positions).reduce((bool, index) => {
     if (!positions[index].length) return bool;
     const match = positions[index].includes(word.charAt(index));

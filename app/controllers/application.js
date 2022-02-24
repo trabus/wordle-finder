@@ -139,13 +139,14 @@ export default class ApplicationController extends Controller {
   }
 
   get api() {
-    const { isMobile, wf, updateLetter, toggleDead } = this;
+    const { isMobile, wf, updateLetter, toggleDead, settings } = this;
     return {
       isMobile,
       wordFinder: wf,
       getLetter: wf.getLetter,
       updateLetter,
       toggleDead,
+      settings,
     };
   }
   getTitle() {
@@ -179,7 +180,7 @@ export default class ApplicationController extends Controller {
     let letter = this.wf.getLetter(value);
     if (letter.location === 's') {
       // put it into d0 for manually excluded letters
-      this.updateLetter('d0', value);
+      this.updateLetter('d', value);
     } else {
       this.updateLetter('s', value);
     }

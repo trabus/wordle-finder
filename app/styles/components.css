@@ -144,8 +144,8 @@
   .bg-letter-d {
     @apply bg-gray-800 letter-text;
   }
-  .bg-letter-d.auto {
-    @apply text-gray-300 outline outline-gray-300;
+  .bg-letter-s.autoExcluded {
+    @apply text-gray-300 bg-gray-800 outline outline-gray-300;
   }
   .g-border {
     @apply border-solid border-4 border-green-600;
