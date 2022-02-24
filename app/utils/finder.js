@@ -9,8 +9,7 @@ export default class Finder {
   static DISPLAY_COUNT = 500;
   #trays = [
     { id: 's', group: 'idle', label: '', name: 'available' },
-    { id: 0, group: 'dead', label: '', name: 'excluded' },
-    { id: 1, group: 'dead', label: '', name: 'excluded' },
+    { id: 'd', group: 'dead', label: '', name: 'excluded' },
     { id: 0, group: 'bad', label: '1', name: 'included' },
     { id: 1, group: 'bad', label: '2', name: 'included' },
     { id: 2, group: 'bad', label: '3', name: 'included' },
@@ -92,19 +91,19 @@ export default class Finder {
   get g4Letters() {
     return this.trays.get('g4').items;
   }
-  get d0Letters() {
-    return this.trays.get('d0').items;
-  }
-  get d1Letters() {
-    return this.trays.get('d1').items;
+  get dLetters() {
+    return this.trays.get('d').items;
   }
   get sLetters() {
     return this.trays.get('s').items;
   }
-
+  @cached
+  get excludedLetters() {
+    return [...this.dLetters];
+  }
   @cached
   get deadLetterValues() {
-    return [...this.d0Letters, ...this.d1Letters];
+    return [...this.dLetters];
   }
   // returns only placed values
   @cached
@@ -163,8 +162,8 @@ export default class Finder {
     let words = [];
     // don't return anything until a letter is placed, or if we have too many found letters
     if (
-      (!this.deadLetterValues.length && !this.foundLetterValues.length) ||
-      (!this.deadLetterValues.length && !this.groupKeyExists)
+      (!this.excludedLetters.length && !this.foundLetterValues.length) ||
+      (!this.excludedLetters.length && !this.groupKeyExists)
     ) {
       this.isPossibleWordsRunning = false;
       return words;
@@ -187,17 +186,26 @@ export default class Finder {
     const uniqueWords = [...new Set(words)];
     const filteredWords = [];
     for (const word of uniqueWords) {
-      if (!stringIncludesLetters(this.deadLetterValues, word))
+      if (!stringIncludesLetters(this.excludedLetters, word))
         filteredWords.push(word);
     }
+    // check placed letter positions for inclusions and exclusions
     if (
       Object.keys(this.goodLetterPositions).length ||
       Object.keys(this.badLetterPositions).length
     ) {
       const filtered = filteredWords.filter((word) => {
         return (
-          positionsMatchWordLetters(this.goodLetterPositions, word, false) &&
-          positionsMatchWordLetters(this.badLetterPositions, word, true)
+          positionsMatchWordLetters({
+            positions: this.goodLetterPositions,
+            word,
+            exclude: false,
+          }) &&
+          positionsMatchWordLetters({
+            positions: this.badLetterPositions,
+            word,
+            exclude: true,
+          })
         );
       });
       this.isPossibleWordsRunning = false;
@@ -223,7 +231,7 @@ export default class Finder {
 
   @cached
   get possibleLetters() {
-    const excluded = [...this.foundLetterValues, ...this.deadLetterValues];
+    const excluded = [...this.foundLetterValues, ...this.excludedLetters];
     return this.word.letters.filter((k) => {
       return !excluded.includes(k);
     });
@@ -257,39 +265,15 @@ export default class Finder {
 
   @cached
   get shouldExcludeLetters() {
-    // TODO: This needs to be accounting for a reset before using foundWordLetters
-    return this.words.letters.filter((k) => {
-      return (
-        !this.foundLetterValues.includes(k) &&
-        !this.foundWordLetters.includes(k) &&
-        !this.manualExcludedLetters.includes(k)
-      );
-    });
-  }
-  // TODO: auto exclusion!
-  @cached
-  get autoExcludedLetters() {
-    return this.words.allLetterData
-      .filter((letter) => {
-        // console.log('auto', letter.name, letter.auto);
-        return letter.location.includes('d1') && letter.auto;
-      })
-      .map((letter) => letter.name);
-  }
-  @cached
-  get manualExcludedLetters() {
-    return this.words.allLetterData
-      .filter((letter) => {
-        // console.log('manual', letter.name, letter.auto);
-        return letter.location.includes('d0') && !letter.auto;
-      })
-      .map((letter) => letter.name);
-  }
-
-  @cached
-  get excludedLetters() {
-    if (!this.settings.autoExclude) return [...this.deadLetterValues];
-    return [...this.manualExcludedLetters, ...this.autoExcludedLetters];
+    return this.lettersPlaced.length
+      ? this.words.letters.filter((k) => {
+          return (
+            !this.foundLetterValues.includes(k) &&
+            !this.foundWordLetters.includes(k) &&
+            !this.excludedLetters.includes(k)
+          );
+        })
+      : [];
   }
 
   clearAllTrays() {
@@ -323,33 +307,6 @@ export default class Finder {
     batch.forEach((item) => {
       this.updateList(...item);
     });
-  };
-
-  // used for auto exclusion
-  batchExclude = (...excluded) => {
-    // get all letter data to cycle through
-    const batch = new Map([
-      ['d1', []],
-      ['s', []],
-    ]);
-    // TODO: This needs to reset d1 letters and recalculate the intersection
-    this.words.allLetterData.forEach((letterData) => {
-      if (excluded.includes(letterData.name)) {
-        // if (!this.foundLetterValues.length) {
-        // }
-        if (!letterData.location.includes('d')) letterData.auto = true;
-        let dead = batch.get('d1');
-        batch.set('d1', [...dead, letterData]);
-      } else {
-        if (letterData.location.includes('d1')) {
-          letterData.auto = false;
-          let start = batch.get('s');
-          batch.set('s', [...start, letterData]);
-        }
-      }
-      console.log('auto', letterData, batch);
-    });
-    this.batchUpdate(batch);
   };
 
   updateLetter = (...values) => {
