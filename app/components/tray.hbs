@@ -2,7 +2,7 @@
     <span class="absolute bottom opacity-10 select-none z-0">{{@name}}</span>
     {{#if @letters}}
         {{#each @letters as |letter|}}
-            <Letter @value={{letter}} @trayId={{@id}} @api={{@api}} @toggleDead={{fn @api.toggleDead letter}} />
+            <Letter @value={{letter}} @trayId={{@id}} @api={{@api}} @toggleDead={{fn @api.toggleDead letter @id}} />
         {{/each}}
     {{/if}}
     {{yield}}

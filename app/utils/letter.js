@@ -13,14 +13,13 @@ export default class Letter {
     this.#history = ['s'];
   }
   get location() {
-    return this.locations.length > 1
-      ? [...this.locations]
-      : this.locations.join('');
+    return this.locations.length > 1 ? [...this.locations] : this.locations.join('');
   }
   // allows duplicates if all existing locations are in the good group
   set location(val) {
     const good = val.match(/(g)([0-9])/) && this.goodLocation;
-    if (good) {
+    const bad = val.match(/(b)([0-9])/) && this.badLocation;
+    if (good || bad) {
       this.locations = [...this.locations, val];
     } else {
       this.locations = [val];
@@ -34,13 +33,23 @@ export default class Letter {
       }).length === this.locations.length
     );
   }
+  get badLocation() {
+    return (
+      this.locations.filter((location) => {
+        return location.match(/(b)([0-9])/);
+      }).length === this.locations.length
+    );
+  }
   get name() {
     return this.#name;
   }
   set name(val) {
     this.#name = val;
   }
-
+  removeLocation(location) {
+    if (this.locations.includes(location))
+      return this.locations.splice(this.locations.indexOf(location), 1);
+  }
   reset() {
     this.locations = ['s'];
   }

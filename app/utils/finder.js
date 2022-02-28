@@ -310,7 +310,6 @@ export default class Finder {
   };
 
   updateLetter = (...values) => {
-    values.auto = false;
     this.updateList(...values);
   };
 
@@ -324,13 +323,13 @@ export default class Finder {
   };
 
   updateList = (...values) => {
-    const [to, letter] = values;
+    const [to, letter, tray] = values;
     // value will always be the letter instance
     const value =
       typeof letter === 'string' ? this.words.letterData.get(letter) : letter;
     const name = value.name;
     const from = value.location;
-    // console.log(`to: ${to} , from ${from}`, value);
+    console.log({ to, from, tray }, value);
     const toList = this[`${to}Letters`];
 
     if (to === from) return;
@@ -345,17 +344,78 @@ export default class Finder {
     // console.log('removing ', value, fromIndex, fromList[fromIndex], [...fromList]);
 
     // let toItems = !to.includes('g') ? [...toList, name] : [name];
-    value.location = to;
-    this.trays.get(to).addItem(name);
+    // b and g trays add to array in setter
+    // if (
+    //   !Array.isArray(value.location) ||
+    //   (value.goodLocation && to.includes('g')) ||
+    //   (value.badLocation && to.includes('b'))
+    // ) {
+    //   value.location = to;
+    //   this.trays.get(to).addItem(name);
+    // } else {
+
+    // }
+    if (
+      (!to.includes('b') && !to.includes('g')) || // to [s, d] from [*]
+      (value.badLocation && !to.includes('b')) || // to [s, d, g] from [b]
+      (value.goodLocation && !to.includes('g')) // to [s, d, b] from [g]
+    ) {
+      // from
+      if (from.includes(tray)) { // from includes exact origin tray, i.e. b1 or g0
+        console.log('tray')
+        // only remove single item from tray
+        this.trays.get(tray).removeItem(name);
+        // if we're not removing single from array, replace
+        if (!Array.isArray(from)) {
+          value.location = to;
+          this.trays.get(to).addItem(name);
+        } else {
+          value.removeLocation(tray);
+        }
+      } else {
+        console.log('all')
+        value.locations.forEach((val) => {
+          this.trays.get(val).removeItem(name);
+        });
+        value.location = to;
+        this.trays.get(to).addItem(name);
+      }
+      if (!value.goodLocation && !value.badLocation) {
+        console.log('reassign')
+        value.location = to;
+        this.trays.get(to).addItem(name);
+      }
+    } else {
+    // if ((to.includes('b') || to.includes('g')) && !from.includes('b') && !from.includes('g')) {
+      value.location = to;
+      this.trays.get(to).addItem(name);
+    }
     // console.log('to', to, this[`${to}Letters`], value);
 
     // if (to !== from) this.trays.get(from).removeItem(name);
-    if (!to.includes('g') || (to.includes('g') && from.includes('b'))) {
-      const fromItems = Array.isArray(from) ? from : [from];
-      fromItems.forEach((val) => {
-        this.trays.get(val).removeItem(name);
-      });
-    }
+    // if from is b or g it can be an array
+    // we only remove one item at a time
+    // if (Array.isArray(from) && !to.includes('g') && !to.includes('b')) {
+    // } else {
+    //   if (!to.includes('g') && !to.includes('b'))
+    //     this.trays.get(from).removeItem(name);
+    // }
+
+    // if (
+    //   (!to.includes('g') && !to.includes('b')) ||
+    //   (to.includes('g') && from.includes('b')) ||
+    // ) {
+    //   console.log('remove', to, from)
+    //   const fromItems = Array.isArray(from) ? from : [from];
+    //   fromItems.forEach((val) => {
+    //     this.trays.get(val).removeItem(name);
+    //   });
+    // }
+
+    // if (!to.includes('b') && from.includes('b')) {
+    //   console.log('away', from, this.trays.get(from))
+    //   // this.trays.get(val).removeItem()
+    // }
 
     // console.log('from', from, this[`${from}Letters`]);
     // console.log(this[`${from}Letters`], this[`${to}Letters`]);
