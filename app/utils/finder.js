@@ -1,8 +1,5 @@
 import Tray from '../utils/tray';
-import {
-  positionsMatchWordLetters,
-  stringIncludesLetters,
-} from '../utils/exclude-include';
+import { positionsMatchWordLetters, stringIncludesLetters } from '../utils/exclude-include';
 import { cached, tracked } from '@glimmer/tracking';
 import { TrackedMap } from 'tracked-built-ins';
 export default class Finder {
@@ -149,11 +146,7 @@ export default class Finder {
   }
   @cached
   get lettersPlaced() {
-    return [
-      ...this.goodLetterValues,
-      ...this.badLetterValues,
-      ...this.deadLetterValues,
-    ];
+    return [...this.goodLetterValues, ...this.badLetterValues, ...this.deadLetterValues];
   }
 
   @cached
@@ -186,8 +179,7 @@ export default class Finder {
     const uniqueWords = [...new Set(words)];
     const filteredWords = [];
     for (const word of uniqueWords) {
-      if (!stringIncludesLetters(this.excludedLetters, word))
-        filteredWords.push(word);
+      if (!stringIncludesLetters(this.excludedLetters, word)) filteredWords.push(word);
     }
     // check placed letter positions for inclusions and exclusions
     if (
@@ -325,8 +317,7 @@ export default class Finder {
   updateList = (...values) => {
     const [to, letter, tray] = values;
     // value will always be the letter instance
-    const value =
-      typeof letter === 'string' ? this.words.letterData.get(letter) : letter;
+    const value = typeof letter === 'string' ? this.words.letterData.get(letter) : letter;
     const name = value.name;
     const from = value.location;
     console.log({ to, from, tray }, value);
@@ -335,8 +326,7 @@ export default class Finder {
     if (to === from) return;
     // don't accept more letters if full
     if (this.tooManyFoundLetters) {
-      if (to.includes('b') && (!from.includes('b') || !from.includes('g')))
-        return;
+      if (to.includes('b') && (!from.includes('b') || !from.includes('g'))) return;
       if (to.includes('g') && from.includes('g') && toList.length) return;
     }
     // don't insert if already occupied
@@ -361,8 +351,9 @@ export default class Finder {
       (value.goodLocation && !to.includes('g')) // to [s, d, b] from [g]
     ) {
       // from
-      if (from.includes(tray)) { // from includes exact origin tray, i.e. b1 or g0
-        console.log('tray')
+      if (from.includes(tray)) {
+        // from includes exact origin tray, i.e. b1 or g0
+        console.log('tray');
         // only remove single item from tray
         this.trays.get(tray).removeItem(name);
         // if we're not removing single from array, replace
@@ -373,7 +364,7 @@ export default class Finder {
           value.removeLocation(tray);
         }
       } else {
-        console.log('all')
+        // console.log('all');
         value.locations.forEach((val) => {
           this.trays.get(val).removeItem(name);
         });
@@ -381,12 +372,12 @@ export default class Finder {
         this.trays.get(to).addItem(name);
       }
       if (!value.goodLocation && !value.badLocation) {
-        console.log('reassign')
+        // console.log('reassign');
         value.location = to;
         this.trays.get(to).addItem(name);
       }
     } else {
-    // if ((to.includes('b') || to.includes('g')) && !from.includes('b') && !from.includes('g')) {
+      // if ((to.includes('b') || to.includes('g')) && !from.includes('b') && !from.includes('g')) {
       value.location = to;
       this.trays.get(to).addItem(name);
     }
