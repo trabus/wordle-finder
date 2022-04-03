@@ -88,8 +88,7 @@ export default class Words {
       const count = this.#letterCounts[v].all;
       const commonCount = this.#letterCounts[v].common;
       const frequency = (count / this.totalWordListLetterCount) * 100;
-      const commonFrequency =
-        (commonCount / this.totalCommonListLetterCount) * 100;
+      const commonFrequency = (commonCount / this.totalCommonListLetterCount) * 100;
       const data = this.#letterData.get(v);
       // console.log('data', v, data)
       data.count = count;

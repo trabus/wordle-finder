@@ -170,19 +170,19 @@ export default class ApplicationController extends Controller {
     this.resetPossibleWords();
   };
 
-  updateLetter = (to, value) => {
+  updateLetter = (to, value, tray) => {
     // update list
-    this.wf.updateLetter(to, value);
+    this.wf.updateLetter(to, value, tray);
     this.displayCount = 0;
   };
 
-  toggleDead = (value) => {
+  toggleDead = (value, tray) => {
     let letter = this.wf.getLetter(value);
     if (letter.location === 's') {
       // put it into d0 for manually excluded letters
-      this.updateLetter('d', value);
+      this.updateLetter('d', value, 's');
     } else {
-      this.updateLetter('s', value);
+      this.updateLetter('s', value, tray);
     }
   };
 

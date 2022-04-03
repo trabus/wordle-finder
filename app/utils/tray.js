@@ -16,9 +16,7 @@ export default class Tray {
   }
 
   get key() {
-    return typeof this.id === 'string'
-      ? this.id
-      : `${this.group.substring(0, 1)}${this.id}`;
+    return typeof this.id === 'string' ? this.id : `${this.group.substring(0, 1)}${this.id}`;
   }
 
   clearItems = () => {
@@ -33,7 +31,6 @@ export default class Tray {
   };
 
   removeItem = (item) => {
-    if (this.items.includes(item))
-      return this.items.splice(this.items.indexOf(item), 1);
+    if (this.items.includes(item)) return this.items.splice(this.items.indexOf(item), 1);
   };
 }
