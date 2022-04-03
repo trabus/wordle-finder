@@ -19,6 +19,12 @@ export default class SettingsService extends Service {
         order: 'abcdefghijklmnopqrstuvwxyz',
         values: [],
       },
+      azerty: {
+        name: 'azerty',
+        value: 'azerty',
+        order: 'azertyuiopqsdfghjklmwxcvbn',
+        values: [],
+      },
       qwerty: {
         name: 'qwerty',
         value: 'qwerty',

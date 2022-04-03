@@ -40,6 +40,20 @@
     @apply -ml-12;
   }
 
+  .keyboard.azerty {
+    @apply grid-cols-10 max-w-lg md:max-w-xl;
+  }
+
+  .keyboard.azerty > .letter-object[data-letter="w"] {
+    @apply col-start-1;
+  }
+  .keyboard.azerty > .letter-object:nth-child(n+12) {
+    @apply ml-12;
+  }
+  .keyboard.azerty > .letter-object:nth-child(n+22) {
+    @apply ml-20;
+  }
+
   .keyboard.qwerty {
     @apply grid-cols-10 max-w-lg md:max-w-xl;
   }
