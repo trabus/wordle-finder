@@ -146,6 +146,9 @@
   .letter-object {
     @apply cursor-pointer rounded-md md:p-3 sm:p-2 p-1.5 md:w-12 md:h-12 sm:w-10 sm:h-10 w-9 h-9 text-center select-none z-10 uppercase;
   }
+  .letter-object.selected {
+    @apply outline outline-white outline-8 z-30;
+  }
   .bg-letter-s {
     @apply bg-gray-500 hover:bg-gray-600 letter-text;
   }

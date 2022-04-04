@@ -15,7 +15,7 @@ export default class Words {
   #letterCounts;
   @tracked isReady = false;
 
-  constructor({ wordList, wordData }) {
+  constructor({ wordList, wordData, settings, controls }) {
     this.#letters = this.#alphabet.split('');
     this.#wordList = wordList;
     this.#wordData = new Map(wordData);
@@ -27,10 +27,14 @@ export default class Words {
     this.#letterSets = new Map();
 
     this.#letterCounts = {};
+    const letterOptions = {
+      settings,
+      controls,
+    };
     for (const l of this.#letters) {
       this.#letterCounts[l] = { all: 0, common: 0 };
       // letterData holds Letter instances
-      this.#letterData.set(l, new Letter(l));
+      this.#letterData.set(l, new Letter(l, letterOptions));
     }
   }
 
@@ -90,12 +94,13 @@ export default class Words {
       const frequency = (count / this.totalWordListLetterCount) * 100;
       const commonFrequency = (commonCount / this.totalCommonListLetterCount) * 100;
       const data = this.#letterData.get(v);
-      // console.log('data', v, data)
       data.count = count;
+
       data.frequency = frequency;
       data.commonCount = commonCount;
       data.commonFrequency = commonFrequency;
       this.#letterData.set(v, data);
+      // console.log('data', v, data)
     }
     // console.log(this.#letterData);
   };

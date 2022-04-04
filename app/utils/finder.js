@@ -23,6 +23,7 @@ export default class Finder {
   @tracked trays;
   @tracked words;
   @tracked settings;
+  @tracked controls;
   isPossibleWordsRunning;
 
   constructor({ words, settings }) {
@@ -320,7 +321,7 @@ export default class Finder {
     const value = typeof letter === 'string' ? this.words.letterData.get(letter) : letter;
     const name = value.name;
     const from = value.location;
-    console.log({ to, from, tray }, value);
+    // console.log({ to, from, tray }, value);
     const toList = this[`${to}Letters`];
 
     if (to === from) return;
@@ -353,7 +354,6 @@ export default class Finder {
       // from
       if (from.includes(tray)) {
         // from includes exact origin tray, i.e. b1 or g0
-        console.log('tray');
         // only remove single item from tray
         this.trays.get(tray).removeItem(name);
         // if we're not removing single from array, replace

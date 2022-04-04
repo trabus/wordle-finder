@@ -19,7 +19,9 @@ export default class ApplicationController extends Controller {
   @tracked showInstructions = false;
   @tracked baseHeight = 0;
   @tracked inactive = false;
+  @tracked selectedTile;
   @service settings;
+  @service controls;
   @service word;
 
   constructor() {
@@ -51,7 +53,7 @@ export default class ApplicationController extends Controller {
       'Concierge',
     ];
 
-    this.word.initWordFinder.perform(this.settings);
+    this.word.initWordFinder.perform(this.settings, this.controls);
   }
 
   @task
@@ -106,8 +108,7 @@ export default class ApplicationController extends Controller {
     if (value === 0) this.possibleWordsDisplayCount = DISPLAY_COUNT;
     if (
       value > this.wf.possibleWordsCount ||
-      (this.wf.possibleWordsCount < DISPLAY_COUNT &&
-        this.wf.possibleWordsCount !== 0)
+      (this.wf.possibleWordsCount < DISPLAY_COUNT && this.wf.possibleWordsCount !== 0)
     ) {
       this.possibleWordsDisplayCount = this.wf.possibleWordsCount;
     }
@@ -139,14 +140,16 @@ export default class ApplicationController extends Controller {
   }
 
   get api() {
-    const { isMobile, wf, updateLetter, toggleDead, settings } = this;
+    const { isMobile, wf, updateLetter, trayClick, tileClick, controls, settings } = this;
     return {
       isMobile,
       wordFinder: wf,
       getLetter: wf.getLetter,
       updateLetter,
-      toggleDead,
+      tileClick,
+      trayClick,
       settings,
+      controls,
     };
   }
   getTitle() {
@@ -176,6 +179,27 @@ export default class ApplicationController extends Controller {
     this.displayCount = 0;
   };
 
+  trayClick = (tray) => {
+    this.placeTile(tray);
+  };
+
+  tileClick = (letter, tray, letterInstance, /* event */) => {
+    if (this.settings.selectPlacement) {
+      // if the selected tile is the same as the one clicked
+      if (this.controls.selectedTile !== letter) {
+        if (letterInstance.location.includes('d')) {
+          this.toggleDead(letter, tray);
+        }
+        this.selectTile(letter);
+      } else {
+        this.toggleDead(letter, tray);
+        this.controls.deselectTile();
+      }
+    } else {
+      this.toggleDead(letter, tray);
+    }
+  };
+
   toggleDead = (value, tray) => {
     let letter = this.wf.getLetter(value);
     if (letter.location === 's') {
@@ -183,6 +207,17 @@ export default class ApplicationController extends Controller {
       this.updateLetter('d', value, 's');
     } else {
       this.updateLetter('s', value, tray);
+    }
+  };
+
+  selectTile = (letter) => this.controls.selectTile(letter);
+
+  placeTile = (to) => {
+    if (this.settings.selectPlacement && this.controls.selectedTile) {
+      this.controls.placeTile((tile) => {
+        let tray = this.wf.getLetter(tile).location;
+        this.updateLetter(to, tile, tray);
+      });
     }
   };
 

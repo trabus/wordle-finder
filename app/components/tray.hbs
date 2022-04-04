@@ -1,8 +1,8 @@
-<DraggableObjectTarget @action={{fn @api.updateLetter @id}} tabindex="0" class="container bg-neutral-900/[.5]" ...attributes>
+<DraggableObjectTarget @action={{fn @api.updateLetter @id}} tabindex="0" class="container bg-neutral-900/[.5]" {{on "click" (fn @api.trayClick @id)}} ...attributes>
     <span class="absolute bottom opacity-10 select-none z-0">{{@name}}</span>
     {{#if @letters}}
         {{#each @letters as |letter|}}
-            <Letter @value={{letter}} @trayId={{@id}} @api={{@api}} @toggleDead={{fn @api.toggleDead letter @id}} />
+            <Letter @value={{letter}} @trayId={{@id}} @api={{@api}} @handleClick={{fn @api.tileClick letter @id}} />
         {{/each}}
     {{/if}}
     {{yield}}
