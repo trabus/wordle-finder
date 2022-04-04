@@ -15,13 +15,13 @@ export default class WordService extends Service {
   }
 
   @task
-  *initWordFinder(settings) {
+  *initWordFinder(settings, controls) {
     const wordList = WordList().words;
     const wordData = WordData();
     yield timeout(100);
-    const words = new Words({ wordList, wordData });
+    const words = new Words({ wordList, wordData, settings, controls });
     this.words = words;
-    this.finder = new Finder({ words, settings });
+    this.finder = new Finder({ words, settings, controls });
     // console.log(this.finder);
   }
 }

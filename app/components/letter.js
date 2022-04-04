@@ -15,9 +15,7 @@ export default class LetterComponent extends Component {
   }
   @cached
   get from() {
-    return Array.isArray(this.value.location)
-      ? this.value.location[0]
-      : this.value.location;
+    return Array.isArray(this.value.location) ? this.value.location[0] : this.value.location;
   }
   get location() {
     const match = this.from.match(/([a-z])([0-9])/);
@@ -27,9 +25,7 @@ export default class LetterComponent extends Component {
 
   get autoExcluded() {
     const { wordFinder, settings } = this.args.api;
-    return settings.autoExclude
-      ? wordFinder.shouldExcludeLetters.includes(this.value.name)
-      : false;
+    return settings.autoExclude ? wordFinder.shouldExcludeLetters.includes(this.value.name) : false;
   }
 
   get letterBg() {
@@ -42,6 +38,14 @@ export default class LetterComponent extends Component {
   get isDraggable() {
     return !this.from.includes('d') && !this.autoExcluded;
   }
+  get showSelected() {
+    return this.value.isSelected && this.args.trayId === 's';
+  }
+  handleClick = (e) => {
+    e.stopPropagation();
+    this.args.handleClick(this.value, e);
+  };
+
   // TODO: turn letterData into delegate class to collect letterInfo into one place
   // get letterData() {
   //   const { api, value } = this.args;
@@ -93,11 +97,7 @@ export default class LetterComponent extends Component {
     html2canvas(e.target).then((canvas) => {
       canvas.globalAlpha = 0.5;
       e.dataTransfer.dropEffect = 'move';
-      e.dataTransfer.setDragImage(
-        canvas,
-        e.target.clientWidth,
-        e.target.clientHeight
-      );
+      e.dataTransfer.setDragImage(canvas, e.target.clientWidth, e.target.clientHeight);
     });
   };
   dragEndHook = (e) => {

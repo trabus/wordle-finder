@@ -9,6 +9,7 @@ export default class SettingsService extends Service {
   @tracked autoExclude = true; //false
   @tracked showLetterInfo = false;
   @tracked showWordInfo = false;
+  @tracked selectPlacement = false;
 
   constructor() {
     super(...arguments);

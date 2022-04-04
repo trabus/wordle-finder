@@ -18,6 +18,9 @@
         </div>
         
         <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "selectPlacement" true)}} @id="selectPlacement" @checked={{this.settings.selectPlacement}}>click to select and place tiles</Toggle>
+        </div>
+        <div class="settings-box-4">
           <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.settings.autoExclude}}>automatically exclude letters</Toggle>
         </div>
         <div class="settings-box-4">

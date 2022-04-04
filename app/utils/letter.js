@@ -2,15 +2,19 @@ import { tracked } from '@glimmer/tracking';
 export default class Letter {
   #name;
   #history;
+  @tracked controls;
+  @tracked settings;
   @tracked locations;
 
-  constructor(letter) {
+  constructor(letter, { settings = {}, controls = {} }) {
     this.#name = letter;
     // location defines current tray(s) letter is in. always starts in 's'
     // the only case where there can be more than one is when
     // the trays are both good letters, to allow for duplicates
     this.locations = ['s'];
     this.#history = ['s'];
+    this.controls = controls;
+    this.settings = settings;
   }
   get location() {
     return this.locations.length > 1 ? [...this.locations] : this.locations.join('');
@@ -45,6 +49,9 @@ export default class Letter {
   }
   set name(val) {
     this.#name = val;
+  }
+  get isSelected() {
+    return this.settings.selectPlacement && this.controls?.selectedTile === this.name;
   }
   removeLocation(location) {
     if (this.locations.includes(location))

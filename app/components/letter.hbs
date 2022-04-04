@@ -5,10 +5,10 @@
    @content={{@value}}
    data-letter={{@value}}
    role="button" 
-   class={{concat "letter-object " this.letterBg}}
+   class={{concat "letter-object " this.letterBg (if this.showSelected " selected")}}
    tabindex="0"
    aria-label={{concat @value " tile " this.location}}
-   {{on "click" @toggleDead}}
+   {{on "click" this.handleClick}}
    {{!-- {{on "mouseenter" (fn this.hoverShowData true)}} --}}
    {{!-- {{on "mouseleave" (fn this.hoverShowData false)}} --}}
    {{!-- {{on "touchstart" (fn this.touchShowData true)}} --}}
