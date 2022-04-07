@@ -245,7 +245,8 @@ export default class Finder {
 
   @cached
   get foundLetterValues() {
-    return [...this.goodLetterValues, ...this.badLetterValues].filter(Boolean);
+    const badLetterValues = [...new Set([...this.badLetterValues])];
+    return [...this.goodLetterValues, ...badLetterValues].filter(Boolean);
   }
 
   @cached

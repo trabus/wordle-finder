@@ -22,6 +22,5 @@ export default class WordService extends Service {
     const words = new Words({ wordList, wordData, settings, controls });
     this.words = words;
     this.finder = new Finder({ words, settings, controls });
-    // console.log(this.finder);
   }
 }
