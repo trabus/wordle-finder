@@ -21,6 +21,7 @@ export default class WordFeed extends LifecycleResource {
   get value() {
     const { wordList } = this.args.named;
     // console.log('wordlist', wordList)
+    // return wordList || [];
     const result = wordList?.slice(this.offset, this.end) || [];
     return result;
   }
