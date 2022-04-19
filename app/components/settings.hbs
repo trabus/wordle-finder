@@ -24,6 +24,9 @@
           <Toggle {{on "input" (fn this.toggleSetting "autoExclude" true)}} @id="autoExclude" @checked={{this.settings.autoExclude}}>automatically exclude letters</Toggle>
         </div>
         <div class="settings-box-4">
+          <Toggle {{on "input" (fn this.toggleSetting "colorContrast" true)}} @id="colorContrast" @checked={{this.settings.colorContrast}}>use color contrast mode</Toggle>
+        </div>
+        <div class="settings-box-4">
           <Toggle {{on "input" (fn this.toggleSetting "sortAlpha" true)}} @id="alphabetical" @checked={{this.settings.sortAlpha}}>sort alphabetically</Toggle>
         </div>
         <div class="settings-box-4">

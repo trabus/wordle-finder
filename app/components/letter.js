@@ -30,8 +30,9 @@ export default class LetterComponent extends Component {
 
   get letterBg() {
     const match = this.from.match(/([a-z])([0-9])/);
+    const { settings } = this.args.api;
     if (match) {
-      return `bg-letter-${match[1]}`;
+      return `bg-letter-${match[1]}${settings.colorContrast ? ' color-contrast' : ''}`;
     }
     return `bg-letter-${this.from}${this.autoExcluded ? ' autoExcluded' : ''}`;
   }
