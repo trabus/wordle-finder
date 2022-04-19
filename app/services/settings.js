@@ -7,6 +7,7 @@ export default class SettingsService extends Service {
   @tracked useCommon = true;
   @tracked sortAlpha = false;
   @tracked autoExclude = true; //false
+  @tracked colorContrast = false;
   @tracked showLetterInfo = false;
   @tracked showWordInfo = false;
   @tracked selectPlacement = false;

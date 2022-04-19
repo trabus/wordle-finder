@@ -155,8 +155,14 @@
   .bg-letter-g {
     @apply bg-green-600 hover:bg-green-900 letter-text;
   }
+  .bg-letter-g.color-contrast {
+    @apply bg-amber-600 hover:bg-amber-900;
+  }
   .bg-letter-b {
     @apply bg-yellow-400 hover:bg-yellow-800 letter-text;
+  }
+  .bg-letter-b.color-contrast {
+    @apply bg-sky-300 hover:bg-sky-600;
   }
   .bg-letter-d {
     @apply bg-gray-800 letter-text;
@@ -167,14 +173,26 @@
   .g-border {
     @apply border-solid border-4 border-green-600;
   }
+  .g-border.color-contrast {
+    @apply border-amber-600;
+  }
   .accepts-drag.g-border {
     @apply outline outline-green-400 outline-8;
+  }
+  .accepts-drag.g-border.color-contrast {
+    @apply outline-amber-400;
   }
   .b-border {
     @apply border-solid border-4 border-yellow-400;
   }
+  .b-border.color-contrast {
+    @apply border-sky-300;
+  }
   .accepts-drag.b-border {
     @apply outline outline-yellow-200 outline-8;
+  }
+  .accepts-drag.b-border.color-contrast {
+    @apply outline-sky-100;
   }
   .d-border {
     @apply border-solid border-4 border-gray-600;
