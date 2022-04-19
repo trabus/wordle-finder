@@ -264,6 +264,14 @@ export default class ApplicationController extends Controller {
     this.resetPossibleWords();
     this.wf.reset();
   };
+  copyToClipBoard = async () => {
+    const words = this.wf.possibleWords.join(',');
+    try {
+      await navigator?.clipboard?.writeText(words);
+    } catch(e) {
+      console.log('error writing to clipboard', e);
+    }
+  };
 
   /**
    * MODIFIERS

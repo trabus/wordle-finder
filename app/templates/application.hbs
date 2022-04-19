@@ -90,11 +90,14 @@
                         <Word @api={{this.api}} @word={{word}} />
                     {{/each}}
                 </div>
+                {{#if (lt this.wordFeed.value.length 40)}}
+                    <button type="button" {{on "click" this.copyToClipBoard}} class="button-blue text-sm">Copy Words to Clipboard</button>
+                {{/if}}
             {{else}}
                 <div class="py-2 text-lg text-center w-full text-gray-600 font-bold">
                     {{this.wordContainerMessage}}
                 </div>
-            {{/if}}
+            {{/if}}      
         </div>
         {{!-- {{#if this.possibleWordsLength}}
             <div class="container mx-auto text-center">
